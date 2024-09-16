@@ -1,0 +1,31 @@
+{
+  "git.enableSmartCommit": true,
+  "editor.renderWhitespace": "none",
+  "git.confirmSync": false,
+  "javascript.validate.enable": false,
+  "git.autofetch": true,
+  "editor.quickSuggestions": {
+    "strings": true
+  },
+  "diffEditor.ignoreTrimWhitespace": true,
+  "breadcrumbs.enabled": true,
+  "editor.formatOnSave": true,
+  "typescript.preferences.quoteStyle": "single",
+  "javascript.preferences.quoteStyle": "single",
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[vue]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "editor.tabSize": 2
+}
