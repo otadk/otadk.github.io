@@ -1,8 +1,4 @@
 {
-  "compilerOptions": {
-    "paths": {
-      "@/*": ["components/*"]
-    }
-  },
-  "exclude": ["node_modules", "docs"]
+  "compilerOptions": {"paths": {"@/*": ["./components/*"] }},
+  "exclude": ["node_modules"]
 }
