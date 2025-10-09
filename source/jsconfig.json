@@ -1,4 +1,0 @@
-{
-  "compilerOptions": {"paths": {"@/*": ["./components/*"] }},
-  "exclude": ["node_modules"]
-}

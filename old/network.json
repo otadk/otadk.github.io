@@ -1,0 +1,206 @@
+/**
+ * @name 网络请求公共组件
+ * @description 该公共组件提供了项目中常用的网络请求
+ * @example network.post('123',{id:1}).then(result=>{}).catch(error=>{});
+ */
+import { Notification } from '@xui/ui-desktop';
+import storage from './storage';
+import { permissionUtils } from '../common-utils/permission-utils';
+
+const SUCCESS_READY_STATE = 4;
+const SUCCESS_STATUS = 200;
+const NOTIFICATION_DURATION = 1500;
+const LOGIN_FAIL_STATUS = 403;
+const DEFAULT_ROLE_CODE = 'fullCode';
+
+/**
+ * @name 获得角色码
+ * @param {string} roleCodeAim 期待的角色请求参数,fullCode即主角色
+ * @returns {string} roleCode 角色请求参数
+ */
+const getRoleCode = roleCodeAim => {
+  if (roleCodeAim !== DEFAULT_ROLE_CODE) {
+    const hasAim = window.$PIX.Context.currentUser.roleCodes.includes(roleCodeAim);
+    const roleCode = hasAim ? roleCodeAim : window.$PIX.Context.currentUser.roleFullCode;
+    return roleCode;
+  }
+  return window.$PIX.Context.currentUser.roleFullCode;
+};
+
+const getBrandListBasic = async (serviceUrl, storageKey, postData) => {
+  const storageData = storage.get(storageKey);
+  if (storageData !== undefined) {
+    return storageData;
+  }
+  const url = `${serviceUrl}/services/psibi/report/thirdSOACommonService/carBids/car-bids:{P_SRV_MSS_CAR_MODEL_SELECT}`;
+  const response = await network.post(url, postData).catch(error => {
+    window.console.log(error);
+  });
+  if (response?.result?.length > 0) {
+    storage.set(storageKey, response.result);
+    return response.result;
+  }
+  return [];
+};
+
+class networkClass {
+  /**
+   * @name 发送post请求
+   * @description 添加了roleCode入参，成功时返回对象，失败时返回状态码
+   * @param {string} url
+   * @param {any} parameters
+   */
+  post(url, parameters, roleCodeAim = DEFAULT_ROLE_CODE) {
+    parameters.roleCode = getRoleCode(roleCodeAim);
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.withCredentials = true;
+      xhr.open('post', url, true);
+      xhr.setRequestHeader('Content-type', 'application/json');
+      xhr.send(JSON.stringify(parameters));
+      xhr.onreadystatechange = () => {
+        if (xhr.readyState === SUCCESS_READY_STATE) {
+          if (xhr.status === SUCCESS_STATUS) {
+            resolve(JSON.parse(xhr.responseText));
+          } else {
+            if (xhr.status === LOGIN_FAIL_STATUS) {
+              Notification({
+                type: 'error',
+                message: '登录失效，请重新登录',
+                duration: NOTIFICATION_DURATION
+              });
+            }
+            reject(xhr.status);
+          }
+        }
+      };
+    });
+  }
+  /**
+   * @name 发送get请求，通常用于请求静态资源
+   */
+  get(url) {
+    return new Promise(resolve => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('get', url);
+      xhr.send();
+      xhr.onreadystatechange = () => {
+        if (xhr.readyState === SUCCESS_READY_STATE) {
+          if (xhr.status === SUCCESS_STATUS) {
+            resolve(JSON.parse(xhr.responseText));
+          } else {
+            window.console.log(xhr.status);
+            resolve({});
+          }
+        }
+      };
+    });
+  }
+  /**
+   * @name 请求获得treeData数据，用storage做缓存处理，没有返回值
+   * @param {string} serviceUrl
+   * @param {function} setAreaTreeData 处理函数入参treeData
+   * @example permissionUtils.getAreaTreeData(props.serviceUrl, storageTreeData => {});
+   */
+  async getAreaTreeData(serviceUrl, setAreaTreeData) {
+    const authData = await permissionUtils.getOrgAndStoreAuth(serviceUrl);
+    if (authData?.orgAuth !== true) {
+      return;
+    }
+    const storageTreeData = storage.get('area-tree-data');
+    if (storageTreeData !== undefined) {
+      setAreaTreeData(storageTreeData);
+    } else {
+      const url = `${serviceUrl}/services/psibi/report/timeshareService/organizationalDimension/car-bids:{P_SRV_MSS_CAR_ORG_AUTH_V2}`;
+      const result = await this.post(url, {}).catch(error => {
+        window.console.log(error);
+      });
+      if (result?.list?.length > 0) {
+        const treeData = JSON.parse(JSON.stringify(result.list).replaceAll('cnName', 'label'));
+        setAreaTreeData(treeData);
+        storage.set('area-tree-data', treeData); // 请求成功之后需要设置storage缓存，为了兼容其他存处理前的数据
+      }
+    }
+  }
+
+  /**
+   * @name 请求获得组织维度树，包含权限判断和缓存处理，一定返回数据，失败时返回空数组
+   * @example const areaTreeData = await network.getAreaTreeDataSync(serviceUrl)
+   */
+  async getAreaTreeDataSync(serviceUrl) {
+    const authData = await permissionUtils.getOrgAndStoreAuth(serviceUrl);
+    if (authData?.orgAuth !== true) {
+      return [];
+    }
+    const storageTreeData = storage.get('area-tree-data');
+    if (storageTreeData !== undefined) {
+      return storageTreeData;
+    }
+    const url = `${serviceUrl}/services/psibi/report/timeshareService/organizationalDimension/car-bids:{P_SRV_MSS_CAR_ORG_AUTH_V2}`;
+    const result = await this.post(url, {}).catch(error => {
+      window.console.log(error);
+    });
+    if (result?.list?.length > 0) {
+      const treeData = JSON.parse(JSON.stringify(result.list).replaceAll('cnName', 'label'));
+      storage.set('area-tree-data', treeData); // 请求成功之后需要设置storage缓存，为了兼容其他存处理前的数据
+      return treeData;
+    }
+    return [];
+  }
+
+  async getBrandListData(serviceUrl) {
+    return await getBrandListBasic(serviceUrl, 'brand-list-data', {
+      P_BRAND: 'ALL',
+      P_MKT_NAME_SHORT_NAME: 'ALL',
+      P_CONFIG_VER: 'ALL',
+      P_SPU_CODE: 'ALL',
+      P_DESC: 'gtm_time'
+    });
+  }
+
+  async getBrandListDataWithIntention(serviceUrl) {
+    return await getBrandListBasic(serviceUrl, 'brand-list-data-with-intention', {
+      P_BRAND: 'ALL',
+      P_MKT_NAME_SHORT_NAME: 'ALL',
+      P_INTENTION_MODEL_CODE: 'ALL',
+      P_INTENTION_MODEL_NAME: 'ALL',
+      P_CONFIG_VER: 'ALL',
+      P_SPU_CODE: 'ALL',
+      P_DESC: 'gtm_time'
+    });
+  }
+
+  /**
+   * @description 使用fetch请求，并处理非200情况
+   * @example const response = await network.fetchPost(`${yourUrl}`, yourParameters)
+   */
+  async fetchPost(url, parameters = {}, roleCodeAim = DEFAULT_ROLE_CODE, signal = null) {
+    parameters.roleCode = getRoleCode(roleCodeAim);
+    const response = await fetch(url, {
+      method: 'POST',
+      signal: signal,
+      credentials: 'include',
+      body: JSON.stringify(parameters),
+      headers: { 'Content-Type': 'application/json' }
+    }).catch(error => {
+      window.console.log(error);
+    });
+    if (response?.ok) {
+      return await response.json();
+    }
+    if (response?.status === LOGIN_FAIL_STATUS) {
+      Notification({
+        type: 'error',
+        message: '登录失效，请重新登录',
+        duration: NOTIFICATION_DURATION
+      });
+    }
+    if (response?.status) {
+      window.console.log(response.status);
+    }
+    return {};
+  }
+}
+
+const network = new networkClass();
+export default network;

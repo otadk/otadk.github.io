@@ -1,0 +1,6 @@
+:root {
+  --vt-c-brand: var(--vt-c-gray-dark-3);
+  --vt-c-brand-light: var(--vt-c-gray-dark-2);
+  --vt-c-brand-dark: var(--vt-c-gray-dark-4);
+  --vt-c-brand-highlight: var(--vt-c-gray-dark-1);
+}

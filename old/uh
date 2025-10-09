@@ -1,0 +1,64 @@
+// const useHeap = <T>( inputCompare = (a: T, b: T): boolean => (a as number) > (b as number)): { toArray: () => T[]; push: (value: T) => void; pop: () => T | null;} => { const compare = (a, b) => { return b < 0 ? false : a < 0 ? true : inputCompare(innerArray[a], innerArray[b]); }; const innerArray: T[] = []; const popGetChildIndex = (parentIndex: number): number => { const leftChildIndex = parentIndex * 2 + 1; const rightChildIndex = parentIndex * 2 + 2; if (leftChildIndex >= innerArray.length) { return -1; } if (rightChildIndex >= innerArray.length) { return leftChildIndex; } return compare(rightChildIndex, leftChildIndex) ? rightChildIndex : leftChildIndex; }; return { toArray: (): T[] => innerArray, push: (value: T): void => { innerArray.push(value); let currentIndex = innerArray.length - 1; let parentIndex = Math.floor((currentIndex - 1) / 2); while (compare(currentIndex, parentIndex)) { const temp = innerArray[parentIndex]; innerArray[parentIndex] = innerArray[currentIndex]; innerArray[currentIndex] = temp; currentIndex = parentIndex; parentIndex = Math.floor((currentIndex - 1) / 2); } }, pop: (): T | null => { if (innerArray.length === 0) { return null; } const root = innerArray[0]; innerArray[0] = innerArray[innerArray.length - 1]; innerArray.pop(); let parentIndex = 0; let currentIndex = popGetChildIndex(parentIndex); while (compare(currentIndex, parentIndex) && currentIndex > -1) { const temp = innerArray[parentIndex]; innerArray[parentIndex] = innerArray[currentIndex]; innerArray[currentIndex] = temp; parentIndex = currentIndex; currentIndex = popGetChildIndex(parentIndex); } return root; }, };};
+
+const useHeap = <T>(
+  inputCompare = (a: T, b: T): boolean => (a as number) > (b as number)
+): {
+  toArray: () => T[];
+  push: (value: T) => void;
+  pop: () => T | null;
+} => {
+  const compare = (a, b) => {
+    return b < 0
+      ? false
+      : a < 0
+      ? true
+      : inputCompare(innerArray[a], innerArray[b]);
+  };
+  const innerArray: T[] = [];
+  const popGetChildIndex = (parentIndex: number): number => {
+    const leftChildIndex = parentIndex * 2 + 1;
+    const rightChildIndex = parentIndex * 2 + 2;
+    if (leftChildIndex >= innerArray.length) {
+      return -1;
+    }
+    if (rightChildIndex >= innerArray.length) {
+      return leftChildIndex;
+    }
+    return compare(rightChildIndex, leftChildIndex)
+      ? rightChildIndex
+      : leftChildIndex;
+  };
+  return {
+    toArray: (): T[] => innerArray,
+    push: (value: T): void => {
+      innerArray.push(value);
+      let currentIndex = innerArray.length - 1;
+      let parentIndex = Math.floor((currentIndex - 1) / 2);
+      while (compare(currentIndex, parentIndex)) {
+        const temp = innerArray[parentIndex];
+        innerArray[parentIndex] = innerArray[currentIndex];
+        innerArray[currentIndex] = temp;
+        currentIndex = parentIndex;
+        parentIndex = Math.floor((currentIndex - 1) / 2);
+      }
+    },
+    pop: (): T | null => {
+      if (innerArray.length === 0) {
+        return null;
+      }
+      const root = innerArray[0];
+      innerArray[0] = innerArray[innerArray.length - 1];
+      innerArray.pop();
+      let parentIndex = 0;
+      let currentIndex = popGetChildIndex(parentIndex);
+      while (compare(currentIndex, parentIndex) && currentIndex > -1) {
+        const temp = innerArray[parentIndex];
+        innerArray[parentIndex] = innerArray[currentIndex];
+        innerArray[currentIndex] = temp;
+        parentIndex = currentIndex;
+        currentIndex = popGetChildIndex(parentIndex);
+      }
+      return root;
+    },
+  };
+};
