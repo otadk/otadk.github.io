@@ -10,12 +10,13 @@
     "type": "vue-tsc --noEmit"
   },
   "dependencies": {
+    "@types/three": "^0.180.0",
     "@vue/repl": "^4.4.2",
     "@vue/theme": "^2.3.0",
     "localforage": "^1.10.0",
+    "three": "^0.180.0",
     "vitepress": "^1.4.3",
-    "vue": "^3.5.12",
-    "vue-i18n": "^11.1.12"
+    "vue": "^3.5.12"
   },
   "devDependencies": {
     "@types/markdown-it": "^14.1.2",

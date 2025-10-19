@@ -9,7 +9,7 @@
   },
   "diffEditor.ignoreTrimWhitespace": true,
   "breadcrumbs.enabled": true,
-  "editor.formatOnSave": true,
+  "editor.formatOnSave": false,
   "typescript.preferences.quoteStyle": "single",
   "javascript.preferences.quoteStyle": "single",
   "[javascript]": {
