@@ -8,17 +8,17 @@ const nav: ThemeConfig["nav"] = [
   {
     text: "works",
     activeMatch: `^/works/`,
-    items: [{ text: "vue-bits-ascii-text", link: "/works/vue-bits-ascii-text" }],
+    items: [{ text: "Vue Bits Ascii Text", link: "/works/vue-bits-ascii-text" }],
   },
   {
     text: "tools",
     activeMatch: `^/tools/`,
-    items: [{ text: "svg-editor", link: "/tools/svg-editor" }],
+    items: [{ text: "Svg Editor", link: "/tools/svg-editor" }],
   },
   {
     text: "blog",
     activeMatch: `^/blogs/`,
-    items: [{ text: "start", link: "/blogs/start" }],
+    items: [{ text: "Restarting the Journey: Notes on Rebuilding My Personal Website", link: "/blogs/restarting-the-journey" }],
   }
 ];
 

@@ -9,3 +9,29 @@
 .dark {
   --logo-color: #fff;
 }
+
+.VPNavBar {
+  background: transparent !important;
+}
+
+.VPNav.nav-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 9999;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  transition: background 0.3s ease, backdrop-filter 0.3s ease;
+}
+
+body.dark .VPNav.nav-bar {
+  background: rgba(0, 0, 0, 0.3);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.VPContent {
+  padding-top: 55px !important;
+}

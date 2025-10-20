@@ -378,7 +378,7 @@ h3 {
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
-@media (max-width: 768px) {
+@media (max-width: 846px) {
   .container {
     grid-template-columns: 1fr;
     gap: 1rem;

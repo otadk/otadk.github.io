@@ -4,7 +4,7 @@ import logo from './logo.vue';
 
 <template>
   <logo />
-  <span style="font-size: 16px; font-weight: 500">otadk</span>
+  <span style="font-size: 16px; font-weight: 500">otadk.github.io</span>
 </template>
 
 <style scoped>
