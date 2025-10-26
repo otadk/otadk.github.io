@@ -8,18 +8,28 @@ const nav: ThemeConfig["nav"] = [
   {
     text: "works",
     activeMatch: `^/works/`,
-    items: [{ text: "Vue Bits Ascii Text", link: "/works/vue-bits-ascii-text" }],
+    items: [
+      { text: "Vue Bits Ascii Text", link: "/works/vue-bits-ascii-text" },
+    ],
   },
   {
     text: "tools",
     activeMatch: `^/tools/`,
-    items: [{ text: "Svg Editor", link: "/tools/svg-editor" }],
+    items: [
+      { text: "Svg Editor", link: "/tools/svg-editor" },
+      { text: "Px to rem", link: "/tools/px-rem" },
+    ],
   },
   {
     text: "blog",
     activeMatch: `^/blogs/`,
-    items: [{ text: "Restarting the Journey: Notes on Rebuilding My Personal Website", link: "/blogs/restarting-the-journey" }],
-  }
+    items: [
+      {
+        text: "Restarting the Journey: Notes on Rebuilding My Personal Website",
+        link: "/blogs/restarting-the-journey",
+      },
+    ],
+  },
 ];
 
 export default defineConfigWithTheme<ThemeConfig>({
@@ -69,7 +79,7 @@ export default defineConfigWithTheme<ThemeConfig>({
     // ],
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/otadk/otadk.github.io' },
+      { icon: "github", link: "https://github.com/otadk/otadk.github.io" },
     ],
     footer: {
       license: {
