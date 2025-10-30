@@ -1,11 +1,6 @@
 <script setup lang="ts">
+import { TodoItem } from '@theme/interface/plan';
 import { ref, computed } from "vue";
-
-interface TodoItem {
-  id: number;
-  text: string;
-  done: boolean;
-}
 
 const props = defineProps<{ todos: TodoItem[] }>();
 const input = ref("");

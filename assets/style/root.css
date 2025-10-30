@@ -35,3 +35,7 @@ body.dark .VPNav.nav-bar {
 .VPContent {
   padding-top: 55px !important;
 }
+
+.VPNavScreen {
+  position: static !important;
+}
