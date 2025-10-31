@@ -63,5 +63,130 @@
         "done": true
       }
     ]
+  },
+  {
+    "date": 20392,
+    "tasks": [
+      {
+        "id": 1761909229149,
+        "text": "上线海螺2.3以及会员修改",
+        "done": true
+      },
+      {
+        "id": 1761892992962,
+        "text": "移动端添加海螺2.3",
+        "done": true
+      },
+      {
+        "id": 1761879609541,
+        "text": "新增会员入口被删掉",
+        "done": true
+      },
+      {
+        "id": 1761879591178,
+        "text": "海螺更新公告",
+        "done": true
+      },
+      {
+        "id": 1761879581171,
+        "text": "o优化Todo组件",
+        "done": false
+      },
+      {
+        "id": 1761877798761,
+        "text": "开发新的付款链接跳转-后端接口不可用",
+        "done": false
+      },
+      {
+        "id": 1761654768650,
+        "text": "改会员文案",
+        "done": true
+      },
+      {
+        "id": 1761492818461,
+        "text": "cms的builder接口开发",
+        "done": false
+      },
+      {
+        "id": 1760946697227,
+        "text": "开发放弃付费弹窗",
+        "done": false
+      },
+      {
+        "id": 1761819133880,
+        "text": "o优化Todo组件设计好数据格式",
+        "done": true
+      }
+    ]
+  },
+  {
+    "date": 20393,
+    "tasks": [
+      {
+        "id": 1761915561858,
+        "text": "o财务统计",
+        "done": false
+      },
+      {
+        "id": 1761915538737,
+        "text": "o写blog并安排好下两周任务",
+        "done": false
+      },
+      {
+        "id": 1761915497977,
+        "text": "o可选-重写首页搞一个原创页面，参考当前的开源代码",
+        "done": false
+      },
+      {
+        "id": 1761915428302,
+        "text": "o可选-把plan换成英文版上线tools",
+        "done": false
+      },
+      {
+        "id": 1761915371322,
+        "text": "o优化dream页面样式做成可以展示的样式改成英文版",
+        "done": false
+      },
+      {
+        "id": 1761915342295,
+        "text": "o迁移nodejs多线程项目到works中",
+        "done": false
+      },
+      {
+        "id": 1761915288246,
+        "text": "o实现plan数据的localforage存储实现导入导出",
+        "done": false
+      },
+      {
+        "id": 1761915257759,
+        "text": "o实现daily的overview页面展示所有并给出导入导出",
+        "done": false
+      },
+      {
+        "id": 1761915123795,
+        "text": "o优化daily页面实现每一天的todo展示",
+        "done": false
+      },
+      {
+        "id": 1761879581171,
+        "text": "o优化Todo组件样式优化",
+        "done": false
+      },
+      {
+        "id": 1761877798761,
+        "text": "开发新的付款链接跳转",
+        "done": false
+      },
+      {
+        "id": 1761492818461,
+        "text": "cms的builder接口开发",
+        "done": false
+      },
+      {
+        "id": 1760946697227,
+        "text": "开发放弃付费弹窗",
+        "done": false
+      }
+    ]
   }
 ]
