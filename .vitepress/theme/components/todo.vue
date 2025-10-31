@@ -73,6 +73,7 @@ function exportJSON() {
           <input type="checkbox" v-model="item.done" />
           <span
             v-if="!editingId || editingId !== item.id"
+            class="todo-span"
             @dblclick="startEdit(item)"
             >{{ item.text }}</span
           >
@@ -103,15 +104,12 @@ function exportJSON() {
   </div>
 </template>
 
-<style scoped>
-.todo {
-  max-width: 420px;
-  margin: 16px auto;
+<style scoped>.todo {
+  margin: 16px;
   padding: 12px 16px;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
-    Arial;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 }
 
 .todo h2 {
@@ -119,6 +117,7 @@ function exportJSON() {
   font-size: 18px;
 }
 
+/* ===== 表单部分 ===== */
 .todo-form {
   display: flex;
   gap: 8px;
@@ -139,6 +138,7 @@ function exportJSON() {
   cursor: pointer;
 }
 
+/* ===== 列表部分 ===== */
 .todo-list {
   list-style: none;
   padding: 0;
@@ -149,8 +149,18 @@ function exportJSON() {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
   padding: 8px 0;
   border-bottom: 1px dashed #f0f0f0;
+  flex-wrap: nowrap;
+  overflow: hidden; /* ✅ 防止超出屏幕 */
+}
+
+.todo-list li label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0; /* ✅ 关键点，允许文字压缩 */
 }
 
 .todo-list li.done span {
@@ -158,19 +168,41 @@ function exportJSON() {
   opacity: 0.6;
 }
 
-.actions button {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  margin-left: 8px;
+/* ===== 文本与编辑框 ===== */
+.todo-span {
+  flex: 1;
+  padding-left: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap; /* ✅ 超长文字省略 */
 }
 
 .edit-input {
-  padding: 4px 6px;
+  flex: 1;
+  min-width: 0; /* ✅ 保证在小屏幕可收缩 */
+  padding: 6px 8px;
   border-radius: 4px;
   border: 1px solid #bbb;
+  font-size: 14px;
 }
 
+/* ===== 操作按钮 ===== */
+.actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 4px;
+}
+
+.actions button {
+  width: 28px;
+  height: 28px;
+  font-size: 14px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+/* ===== 底部区域 ===== */
 .footer {
   display: flex;
   justify-content: space-between;
@@ -184,11 +216,20 @@ function exportJSON() {
   gap: 8px;
 }
 
-.import-label {
-  cursor: pointer;
-  background: #f5f5f5;
-  padding: 6px 10px;
-  border-radius: 6px;
-  border: 1px solid #ddd;
+/* ===== 小屏优化 ===== */
+@media (max-width: 480px) {
+  .todo {
+    padding: 10px;
+  }
+
+  .actions button {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+  }
+
+  .edit-input {
+    font-size: 13px;
+  }
 }
 </style>

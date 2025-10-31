@@ -5,11 +5,11 @@ page: true
 <script lang="ts" setup>
 import { usePlanStore } from '@theme/store/plan'
 import todo from '@theme/components/todo.vue'
+import { useUrlSearchParams } from '@vueuse/core'
 
 const planStore = usePlanStore()
-planStore.setup()
-import { useUrlSearchParams } from '@vueuse/core'
 const params = useUrlSearchParams('history')
+planStore.setup(params?.date)
 
 </script>
 

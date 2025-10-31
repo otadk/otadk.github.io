@@ -6,5 +6,5 @@ export interface TodoItem {
 
 export interface PlanItem {
   date: number;
-  tasks: TodoItem;
+  tasks: TodoItem[];
 }
