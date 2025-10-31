@@ -7,11 +7,7 @@ import { usePlanStore } from '@theme/store/plan'
 import todo from '@theme/components/todo.vue'
 
 const planStore = usePlanStore()
-planStore.setup()
 import { useUrlSearchParams } from '@vueuse/core'
-const params = useUrlSearchParams('history')
-console.log(params) // 'bar'
-
 
 </script>
 
