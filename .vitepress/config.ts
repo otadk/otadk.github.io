@@ -10,6 +10,7 @@ const nav: ThemeConfig["nav"] = [
     activeMatch: `^/works/`,
     items: [
       { text: "Vue Bits Ascii Text", link: "/works/vue-bits-ascii-text" },
+      { text: "Greedy Snake", link: "/works/greedy-snake" },
     ],
   },
   {
@@ -27,6 +28,10 @@ const nav: ThemeConfig["nav"] = [
       {
         text: "Restarting the Journey: Notes on Rebuilding My Personal Website",
         link: "/blogs/restarting-the-journey",
+      },
+      {
+        text: "Building the Foundation: From Structure to Vision",
+        link: "/blogs/building-the-foundation",
       },
     ],
   },

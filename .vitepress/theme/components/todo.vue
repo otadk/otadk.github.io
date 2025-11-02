@@ -2,7 +2,6 @@
 import { TodoItem } from "@theme/interface/plan";
 import { ref, computed } from "vue";
 
-// ✅ 用 defineModel 取代 defineProps + defineEmits 的组合
 const todos = defineModel<TodoItem[]>("todos", { required: true });
 const emit = defineEmits(["save"]);
 
@@ -212,35 +211,21 @@ function save() {
   gap: 8px;
 }
 
-/* ===== 小屏优化 ===== */
-@media (max-width: 480px) {
-  .todo {
-    padding: 10px;
-  }
-
-  .actions button {
-    width: 24px;
-    height: 24px;
-    font-size: 12px;
-  }
-
-  .edit-input {
-    font-size: 13px;
-  }
-}
-
 .dark button {
   background: var(--vt-c-gray-dark-4);
 }
+
 button {
   background: var(--vt-c-white-soft);
   border-radius: 6px;
   padding: 0 4px;
 }
+
 .dark button:hover {
   background: var(--vt-c-white-soft);
   color: var(--vt-c-text-light-1);
 }
+
 button:hover {
   background: var(--vt-c-gray-dark-4);
   color: var(--vt-c-text-dark-1);
