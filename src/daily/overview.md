@@ -3,9 +3,12 @@ page: true
 ---
 
 <script lang="ts" setup>
+import { onMounted } from 'vue';
 import { usePlanStore } from '@theme/store/plan'
 const planStore = usePlanStore()
-planStore.setup()
+onMounted(() => {
+  planStore.setup()
+})
 </script>
 
 <div>
