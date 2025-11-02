@@ -1,15 +1,17 @@
 <script setup lang="ts">
-import { TodoItem } from '@theme/interface/plan';
+import { TodoItem } from "@theme/interface/plan";
 import { ref, computed } from "vue";
 
-const props = defineProps<{ todos: TodoItem[] }>();
+// ✅ 用 defineModel 取代 defineProps + defineEmits 的组合
+const todos = defineModel<TodoItem[]>("todos", { required: true });
+const emit = defineEmits(["save"]);
+
 const input = ref("");
-const todos = ref<TodoItem[]>(props.todos);
 const editingId = ref<number | null>(null);
 const editingText = ref("");
 
 function addTodo() {
-  const text = input.value && input.value.trim();
+  const text = input.value.trim();
   if (!text) return;
   todos.value.unshift({ id: Date.now(), text, done: false });
   input.value = "";
@@ -30,7 +32,7 @@ function startEdit(item: TodoItem) {
 
 function finishEdit(item: TodoItem) {
   if (!editingId.value) return;
-  const text = editingText.value && editingText.value.trim();
+  const text = editingText.value.trim();
   if (text) {
     const idx = todos.value.findIndex((t) => t.id === item.id);
     if (idx !== -1) todos.value[idx].text = text;
@@ -41,16 +43,8 @@ function finishEdit(item: TodoItem) {
 
 const remaining = computed(() => todos.value.filter((t) => !t.done).length);
 
-function exportJSON() {
-  const blob = new Blob([JSON.stringify(todos.value, null, 2)], {
-    type: "application/json",
-  });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "todos.json";
-  a.click();
-  URL.revokeObjectURL(url);
+function save() {
+  emit("save", todos.value);
 }
 </script>
 
@@ -98,18 +92,20 @@ function exportJSON() {
       <span>{{ remaining }} remaining</span>
       <div class="footer-actions">
         <button @click="clearCompleted">Clear completed</button>
-        <button @click="exportJSON">Export JSON</button>
+        <button @click="save">Save</button>
       </div>
     </div>
   </div>
 </template>
 
-<style scoped>.todo {
+<style scoped>
+.todo {
   margin: 16px;
   padding: 12px 16px;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial;
 }
 
 .todo h2 {
@@ -231,5 +227,22 @@ function exportJSON() {
   .edit-input {
     font-size: 13px;
   }
+}
+
+.dark button {
+  background: var(--vt-c-gray-dark-4);
+}
+button {
+  background: var(--vt-c-white-soft);
+  border-radius: 6px;
+  padding: 0 4px;
+}
+.dark button:hover {
+  background: var(--vt-c-white-soft);
+  color: var(--vt-c-text-light-1);
+}
+button:hover {
+  background: var(--vt-c-gray-dark-4);
+  color: var(--vt-c-text-dark-1);
 }
 </style>

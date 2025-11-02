@@ -9,8 +9,8 @@ import { useUrlSearchParams } from '@vueuse/core'
 
 const planStore = usePlanStore()
 const params = useUrlSearchParams('history')
-planStore.setup(params?.date)
+planStore.todoSetup(params?.date)
 
 </script>
 
-<todo v-if="planStore.currentTodos?.length > 0" :todos="planStore.currentTodos"/>
+<todo v-if="planStore.currentTodos" :todos="planStore.currentTodos" @save="planStore.updateCurrentTodos" />
