@@ -19,6 +19,15 @@ const nav: ThemeConfig["nav"] = [
     items: [
       { text: "Svg Editor", link: "/tools/svg-editor" },
       { text: "Px to rem", link: "/tools/px-rem" },
+      {
+        text: "daily",
+        activeMatch: `/tools/daily`,
+        items: [
+          { text: 'daily', link: 'tools/daily' },
+          { text: 'daily overview', link: 'tools/daily/overview' },
+        ]
+
+      }
     ],
   },
   {

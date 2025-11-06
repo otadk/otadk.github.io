@@ -9,7 +9,7 @@ import localforage from 'localforage';
 export const usePlanStore = defineStore("plan", () => {
   const planData = ref<PlanItem[]>([]);
   const currentTodos = ref<TodoItem[]>([]);
-  let dateRecord: number;
+  const dateRecord = ref<number>();
 
   const todoSetup = async (date?: string) => {
     await getPlanData();
@@ -17,18 +17,20 @@ export const usePlanStore = defineStore("plan", () => {
       return;
     }
     if (date) {
-      dateRecord = dateStringToDays(date);
+      dateRecord.value = dateStringToDays(date);
       const aimPlan = planData.value.filter(
-        (value) => value.date === dateRecord
+        (value) => value.date === dateRecord.value
       );
       if (aimPlan?.length > 0) {
         currentTodos.value = aimPlan[0].tasks;
-        return;
+      } else {
+        currentTodos.value = []
       }
+      return;
     }
-    dateRecord = getCurrentDate();
+    dateRecord.value = getCurrentDate();
     const currentPlan = planData.value.filter(
-      (value) => value.date === dateRecord
+      (value) => value.date === dateRecord.value
     )
     if (currentPlan?.length > 0) {
       currentTodos.value = currentPlan[0].tasks;
@@ -38,9 +40,9 @@ export const usePlanStore = defineStore("plan", () => {
   const getPlanData = async () => {
     const localPlan = await localforage.getItem<PlanItem[]>(planStoreConst.PLAN_STORE_KEY);
     if (!localPlan) {
-      const planJSON  = await getPlanJSON();
-      planData.value = planJSON;
-      await localforage.setItem(planStoreConst.PLAN_STORE_KEY, planJSON);
+      // const planJSON  = await getPlanJSON(); // 这里之后改成通过按钮拿我的，这样就可以有多份plan了
+      planData.value = [];
+      await localforage.setItem(planStoreConst.PLAN_STORE_KEY, []);
       return;
     }
     planData.value = localPlan;
@@ -49,17 +51,21 @@ export const usePlanStore = defineStore("plan", () => {
 
 
   const updateCurrentTodos = async (todos: TodoItem[]) => {
+    if (dateRecord.value === undefined) {
+      return;
+    }
     let aimIndex = -1;
     planData.value.forEach((value, index) => {
-      if (value.date === dateRecord) {
+      if (value.date === dateRecord.value) {
         aimIndex = index;
       }
     })
     const rawTodos = toRaw(todos);
     if (aimIndex === -1) {
-      planData.value.push({date: dateRecord, tasks: rawTodos});
+      planData.value.push({date: dateRecord.value, tasks: rawTodos});
     }
-    planData.value[aimIndex].tasks = rawTodos;
+    planData.value[planData.value.length - 1].tasks = rawTodos;
+    planData.value.sort((a, b) => a.date - b.date);
     await localforage.setItem(planStoreConst.PLAN_STORE_KEY, toRaw(planData.value));
   }
 
