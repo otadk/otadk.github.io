@@ -26,7 +26,6 @@ const nav: ThemeConfig["nav"] = [
           { text: 'daily', link: 'tools/daily' },
           { text: 'daily overview', link: 'tools/daily/overview' },
         ]
-
       }
     ],
   },

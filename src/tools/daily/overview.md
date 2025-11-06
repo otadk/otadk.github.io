@@ -11,7 +11,7 @@ const planStore = usePlanStore();
 const router = useRouter();
 const inputValue = ref('');
 const handleSubmit = () => {
-  router.go(`/daily?date=${inputValue.value.trim()}`);
+  router.go(`/tools/daily?date=${inputValue.value.trim()}`);
 }
 
 onMounted(() => {
