@@ -1,4 +1,3 @@
-import { getPlanJSON } from "@theme/api/plan";
 import { PlanItem, TodoItem } from "@theme/interface/plan";
 import { dateStringToDays, getCurrentDate } from "@theme/utils/date";
 import { defineStore } from "pinia";
@@ -13,9 +12,6 @@ export const usePlanStore = defineStore("plan", () => {
 
   const todoSetup = async (date?: string) => {
     await getPlanData();
-    if (!planData.value?.length) {
-      return;
-    }
     if (date) {
       dateRecord.value = dateStringToDays(date);
       const aimPlan = planData.value.filter(
