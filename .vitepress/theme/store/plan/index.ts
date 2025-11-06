@@ -14,6 +14,7 @@ export const usePlanStore = defineStore("plan", () => {
     await getPlanData();
     if (date) {
       dateRecord.value = dateStringToDays(date);
+      console.log({d: dateRecord.value})
       const aimPlan = planData.value.filter(
         (value) => value.date === dateRecord.value
       );
