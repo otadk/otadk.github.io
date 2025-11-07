@@ -3,7 +3,7 @@ import { TodoItem } from "@theme/interface/plan";
 import { ref, computed } from "vue";
 
 const todos = defineModel<TodoItem[]>("todos", { required: true });
-const emit = defineEmits(["save"]);
+const emit = defineEmits(["save", "before", "next"]);
 
 const input = ref("");
 const editingId = ref<number | null>(null);
@@ -90,6 +90,8 @@ function save() {
     <div class="footer">
       <span>{{ remaining }} remaining</span>
       <div class="footer-actions">
+        <button @click="emit('before')">← Prev</button>
+        <button @click="emit('next')">Next →</button>
         <button @click="clearCompleted">Clear completed</button>
         <button @click="save">Save</button>
       </div>

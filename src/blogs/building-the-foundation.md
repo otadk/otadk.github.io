@@ -48,15 +48,11 @@ capturing both ideas and emotional states.
 
 Over time, it will grow into the most **human and expressive** part of my website.
 
----
-
 ## Phase Achievements
 
 - ✅ Built the new **TODO system** (JSON import/export + local storage)  
 - ✅ Successfully migrated the old **Snake Game** project (Huawei competition)  
 - ✅ Added a **glassmorphism-style navigation bar** for enhanced visual depth  
-
----
 
 ## Goals for the Next Two Weeks
 

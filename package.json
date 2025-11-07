@@ -14,6 +14,7 @@
     "@vue/repl": "^4.4.2",
     "@vue/theme": "^2.3.0",
     "@vueuse/core": "^14.0.0",
+    "dayjs": "^1.11.19",
     "localforage": "^1.10.0",
     "pinia": "^3.0.3",
     "three": "^0.180.0",
