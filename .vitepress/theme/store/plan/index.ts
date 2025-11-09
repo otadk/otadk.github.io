@@ -14,7 +14,6 @@ export const usePlanStore = defineStore("plan", () => {
     await getPlanData();
     if (date) {
       dateRecord.value = dateStringToDays(date);
-      console.log({d: dateRecord.value})
       const aimPlan = planData.value.filter(
         (value) => value.date === dateRecord.value
       );
@@ -57,11 +56,11 @@ export const usePlanStore = defineStore("plan", () => {
         aimIndex = index;
       }
     })
-    const rawTodos = toRaw(todos);
     if (aimIndex === -1) {
-      planData.value.push({date: dateRecord.value, tasks: rawTodos});
+      planData.value.push({date: dateRecord.value, tasks: todos});
+    } else {
+      planData.value[aimIndex].tasks = todos;
     }
-    planData.value[planData.value.length - 1].tasks = rawTodos;
     planData.value.sort((a, b) => a.date - b.date);
     await localforage.setItem(planStoreConst.PLAN_STORE_KEY, toRaw(planData.value));
   }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { TodoItem } from "@theme/interface/plan";
-import { ref, computed } from "vue";
+import { ref, computed, toRaw } from "vue";
 
 const todos = defineModel<TodoItem[]>("todos", { required: true });
 const emit = defineEmits(["save", "before", "next"]);
@@ -43,7 +43,7 @@ function finishEdit(item: TodoItem) {
 const remaining = computed(() => todos.value.filter((t) => !t.done).length);
 
 function save() {
-  emit("save", todos.value);
+  emit("save", toRaw(todos.value));
 }
 </script>
 
