@@ -1,9 +1,10 @@
 import { PlanItem, TodoItem } from "@theme/interface/plan";
 import { dateStringToDays, getCurrentDate } from "@theme/utils/date";
 import { defineStore } from "pinia";
-import { ref, toRaw } from "vue";
+import { Ref, ref, toRaw, unref } from "vue";
 import { planStoreConst } from './const';
 import localforage from 'localforage';
+import { deepUnrefSafe } from '@theme/utils/vue-utils';
 
 export const usePlanStore = defineStore("plan", () => {
   const planData = ref<PlanItem[]>([]);
@@ -45,7 +46,6 @@ export const usePlanStore = defineStore("plan", () => {
     return;
   }
 
-
   const updateCurrentTodos = async (todos: TodoItem[]) => {
     if (dateRecord.value === undefined) {
       return;
@@ -62,7 +62,7 @@ export const usePlanStore = defineStore("plan", () => {
       planData.value[aimIndex].tasks = todos;
     }
     planData.value.sort((a, b) => a.date - b.date);
-    await localforage.setItem(planStoreConst.PLAN_STORE_KEY, toRaw(planData.value));
+    await localforage.setItem(planStoreConst.PLAN_STORE_KEY, deepUnrefSafe(planData.value));
   }
 
   const setup = async () => {

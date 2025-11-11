@@ -43,7 +43,7 @@ function finishEdit(item: TodoItem) {
 const remaining = computed(() => todos.value.filter((t) => !t.done).length);
 
 function save() {
-  emit("save", toRaw(todos.value));
+  emit("save", todos.value);
 }
 </script>
 
