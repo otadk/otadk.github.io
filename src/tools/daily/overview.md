@@ -21,6 +21,7 @@ onMounted(() => {
 
 <button @click="planStore.clearCache()">Clean Cache</button>
 <button @click="planStore.exportPlan()">Export JSON</button>
+<label>Import JSON<input type="file" id="fileInput" accept=".json" @change="planStore.importPlan" /></label>
 <form class="simple-form" @submit.prevent="handleSubmit">
   <input
     v-model="inputValue"
@@ -31,22 +32,23 @@ onMounted(() => {
 </form>
 
 <style scoped>
-.dark button {
+.dark button, .dark label {
   background: var(--vt-c-gray-dark-4);
 }
-button {
+button, label {
   background: var(--vt-c-white-soft);
   border-radius: 6px;
   padding: 8px 12px;
   margin: 8px;
   border: none;
   cursor: pointer;
+  position: relative; 
 }
-.dark button:hover {
+.dark button:hover, .dark label:hover {
   background: var(--vt-c-white-soft);
   color: var(--vt-c-text-light-1);
 }
-button:hover {
+button:hover, label:hover {
   background: var(--vt-c-gray-dark-4);
   color: var(--vt-c-text-dark-1);
 }
@@ -66,5 +68,8 @@ button:hover {
 .simple-form input:focus {
   border-color: var(--vt-c-brand);
   box-shadow: 0 0 4px var(--vt-c-brand);
+}
+input[type="file"] {
+  display: none
 }
 </style>

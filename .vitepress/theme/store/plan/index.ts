@@ -93,6 +93,42 @@ export const usePlanStore = defineStore("plan", () => {
     URL.revokeObjectURL(url);
   };
 
+const importPlan = async (event: Event) => {
+  const file = (event.target as HTMLInputElement).files?.[0]
+  if (!file) {
+    return;
+  }
+  try {
+    const text = await file.text()
+    const json = JSON.parse(text)
+
+    // ✅ 基本校验（是否符合 PlanItem[] 格式）
+    if (!Array.isArray(json)) {
+      throw new Error("Invalid file format: not an array")
+    }
+
+    // 可选：进一步验证字段结构
+    const valid = json.every(
+      (item) =>
+        typeof item.date === "number" &&
+        Array.isArray(item.tasks)
+    )
+    if (!valid) {
+      throw new Error("Invalid data structure in file")
+    }
+
+    // ✅ 更新 store
+    planData.value = json
+
+    // ✅ 保存到 localforage
+    await localforage.setItem(planStoreConst.PLAN_STORE_KEY, json)
+  } catch (err: any) {
+    console.error("Failed to import plan:", err)
+    alert(`导入失败：${err.message}`)
+  }
+}
+
+
   return {
     planData,
     currentTodos,
@@ -102,6 +138,7 @@ export const usePlanStore = defineStore("plan", () => {
     updateCurrentTodos,
     clearCache,
     exportPlan,
+    importPlan,
     ...planStoreConst,
   };
 });
