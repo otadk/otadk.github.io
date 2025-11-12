@@ -16,17 +16,17 @@ onMounted(() => {
   planStore.todoSetup(params?.date)
 })
 
-const goBefore = () => {
+const goBefore = async () => {
   const current = dayjs(params.date || dayjs())
-  planStore.updateCurrentTodos()
+  // await planStore.updateCurrentTodos()
   const newDate = current.subtract(1, 'day').format('YYYYMMDD')
   params.date = newDate
   planStore.todoSetup(newDate)
 }
 
-const goNext = () => {
+const goNext = async () => {
   const current = dayjs(params.date || dayjs())
-  planStore.updateCurrentTodos()
+  // await planStore.updateCurrentTodos()
   const newDate = current.add(1, 'day').format('YYYYMMDD')
   params.date = newDate
   planStore.todoSetup(newDate)

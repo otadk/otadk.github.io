@@ -89,6 +89,7 @@ export const usePlanStore = defineStore("plan", () => {
   return {
     planData,
     currentTodos,
+    dateRecord,
     setup,
     todoSetup,
     updateCurrentTodos,
