@@ -18,6 +18,7 @@ onMounted(() => {
 
 const goBefore = () => {
   const current = dayjs(params.date || dayjs())
+  planStore.updateCurrentTodos()
   const newDate = current.subtract(1, 'day').format('YYYYMMDD')
   params.date = newDate
   planStore.todoSetup(newDate)
@@ -25,6 +26,7 @@ const goBefore = () => {
 
 const goNext = () => {
   const current = dayjs(params.date || dayjs())
+  planStore.updateCurrentTodos()
   const newDate = current.add(1, 'day').format('YYYYMMDD')
   params.date = newDate
   planStore.todoSetup(newDate)

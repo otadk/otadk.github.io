@@ -1,7 +1,7 @@
 import { PlanItem, TodoItem } from "@theme/interface/plan";
 import { dateStringToDays, getCurrentDate } from "@theme/utils/date";
 import { defineStore } from "pinia";
-import { Ref, ref, toRaw, unref } from "vue";
+import { ref, toRaw } from "vue";
 import { planStoreConst } from './const';
 import localforage from 'localforage';
 import { deepUnrefSafe } from '@theme/utils/vue-utils';

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { TodoItem } from "@theme/interface/plan";
-import { ref, computed, toRaw } from "vue";
+import { ref, computed } from "vue";
 
 const todos = defineModel<TodoItem[]>("todos", { required: true });
 const emit = defineEmits(["save", "before", "next"]);
