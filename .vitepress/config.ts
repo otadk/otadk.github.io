@@ -11,6 +11,7 @@ const nav: ThemeConfig["nav"] = [
     items: [
       { text: "Vue Bits Ascii Text", link: "/works/vue-bits-ascii-text" },
       { text: "Greedy Snake", link: "/works/greedy-snake" },
+      { text: "Dreams", link: "/works/dreams" },
     ],
   },
   {

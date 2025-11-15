@@ -1,42 +1,52 @@
 [
   {
-    "title": "发布国内版",
-    "description": "整个网站可以做成国内中文版发布在某个国内云服务上"
+    "title": "Launch domestic version",
+    "description": "Build a Chinese version of the entire site and deploy it on a domestic cloud service.",
+    "current": false
   },
   {
-    "title": "创建后端接口服务",
-    "description": "创建后端接口服务最好用node写连数据库，记录访问次数，记录steamdt数据可以转发请求做数据分析，通过接口实现音乐功能，通过接口实现ai功能，通过接口实现留言弹幕功能"
+    "title": "Create backend API service",
+    "description": "Build a Node-powered backend with a database to log visits, capture Steamdt data for analytics, and expose APIs for music, AI features, and real-time comments.",
+    "current": false
   },
   {
-    "title": "发布国内小程序端",
-    "description": "把国内版做移动端适配使得可以在小程序上使用，主要是跑通小程序上线流程"
+    "title": "Launch domestic mini program",
+    "description": "Adapt the domestic version for mobile so it can run as a mini program, mainly to complete the release process.",
+    "current": false
   },
   {
-    "title": "好的作品集",
-    "description": "保持每两周更新至少一个作品，有5个自己完成的复杂并且很棒的作品，希望有一个类似简历的展示自己人生经历的"
+    "title": "Stronger portfolio",
+    "description": "Ship at least one new project every two weeks, reaching five complex and impressive personal builds plus a resume-style timeline of my journey.",
+    "current": true
   },
   {
-    "title": "减肥",
-    "description": "目前体重75kg左右，希望26年能在70kg左右，创建一个页面展示我的体重变化"
+    "title": "Lose weight",
+    "description": "Currently around 75 kg; aim to be near 70 kg by 2026 and create a page tracking the progress.",
+    "current": false
   },
   {
-    "title": "抗老变帅健康",
-    "description": "提高自己的颜值，用些护肤品，身体健康"
+    "title": "Stay youthful and healthy",
+    "description": "Improve appearance, take care of my skin, and keep my body in great shape.",
+    "current": false
   },
   {
-    "title": "资金记录",
-    "description": "希望每个月都能统计展示一个财务报告"
+    "title": "Track finances",
+    "description": "Publish a financial report every month to keep an eye on cash flow.",
+    "current": true
   },
   {
-    "title": "投资信息",
-    "description": "展示当前各种理财投资的方式与收益率并提供渠道与业务"
+    "title": "Investment insights",
+    "description": "Show different investment methods, their returns, and provide channels or services to access them.",
+    "current": false
   },
   {
-    "title": "小项目",
-    "description": "跑通国内小程序之后可以尝试收费或广告小项目，个人小程序不让收费可以搞加微信转账或者放收款码，后续可以申请个体户"
+    "title": "Small side projects",
+    "description": "After mini program approval, experiment with paid or ad-supported projects, using transfers or QR payments if individual programs cannot charge, and later register as a sole proprietor.",
+    "current": false
   },
   {
-    "title": "发视频",
-    "description": "完成国内版后发视频到 b站等平台宣传"
+    "title": "Post videos",
+    "description": "Once the domestic version is ready, publish promo videos on Bilibili and other platforms.",
+    "current": false
   }
 ]
