@@ -1,4 +1,5 @@
 # Building the Foundation: From Structure to Vision
+*Phase 2 Blog Notes · Nov 2025*
 
 As I move into the second phase of rebuilding my personal website, my focus has shifted toward **integrating past experiences and planning for the future**.  
 This stage is not just about technical reconstruction — it’s also an exercise in **growth, reflection, and continuity**.

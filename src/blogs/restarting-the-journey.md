@@ -1,4 +1,5 @@
 # Restarting the Journey: Notes on Rebuilding My Personal Website
+*Phase 1 Blog Notes · Oct 2025*
 
 After three years, I’ve decided to restart my personal website project. Back in 2021, I made an attempt, but for various reasons, I couldn’t keep it up, and eventually, the site disappeared after the domain expired. Now that I’ve settled into a new work environment, I’m determined to begin again — to build a site that truly serves as my **personal portfolio** and a space to accumulate my creative work.
 
