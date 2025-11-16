@@ -56,6 +56,7 @@ export default defineConfigWithTheme<ThemeConfig>({
   description: "otadk.github.io - a personal website from Jingfei Guo",
   srcDir: "src",
   head: [
+    ["meta", { name: "msvalidate.01", content: "7B3D18E49E120F96C2CB746A05E6A657" }],
     ["meta", { name: "theme-color", content: "#3c8772" }],
     ["meta", { property: "og:url", content: "https://otadk.github.io/" }],
     ["meta", { property: "og:type", content: "website" }],
