@@ -3,7 +3,7 @@ import { TodoItem } from "@theme/interface/plan";
 import { ref, computed } from "vue";
 
 const todos = defineModel<TodoItem[]>("todos", { required: true });
-const emit = defineEmits(["save", "before", "next"]);
+const emit = defineEmits(["save", "before", "next", "overview"]);
 
 const input = ref("");
 const editingId = ref<number | null>(null);
@@ -18,10 +18,6 @@ function addTodo() {
 
 function remove(id: number) {
   todos.value = todos.value.filter((t) => t.id !== id);
-}
-
-function clearCompleted() {
-  todos.value = todos.value.filter((t) => !t.done);
 }
 
 function startEdit(item: TodoItem) {
@@ -92,7 +88,7 @@ function save() {
       <div class="footer-actions">
         <button @click="emit('before')">← Prev</button>
         <button @click="emit('next')">Next →</button>
-        <button @click="clearCompleted">Clear completed</button>
+        <button @click="emit('overview')">Overview ↗</button>
         <button @click="save">Save</button>
       </div>
     </div>

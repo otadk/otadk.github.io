@@ -6,6 +6,7 @@ page: true
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vitepress';
 import { usePlanStore } from '@theme/store/plan';
+import PlanDataBoard from '@theme/components/plan-data-board.vue';
 
 const planStore = usePlanStore();
 const router = useRouter();
@@ -13,13 +14,16 @@ const inputValue = ref('');
 const handleSubmit = () => {
   router.go(`/tools/daily?date=${inputValue.value.trim()}`);
 }
+const handleNavigate = (targetDate: string) => {
+  inputValue.value = targetDate;
+  router.go(`/tools/daily?date=${targetDate}`);
+}
 
 onMounted(() => {
   planStore.setup();
 });
 </script>
 
-<button @click="planStore.clearCache()">Clean Cache</button>
 <button @click="planStore.exportPlan()">Export JSON</button>
 <label>Import JSON<input type="file" id="fileInput" accept=".json" @change="planStore.importPlan" /></label>
 <form class="simple-form" @submit.prevent="handleSubmit">
@@ -30,6 +34,8 @@ onMounted(() => {
   />
   <button type="submit">GO</button>
 </form>
+
+<PlanDataBoard :plans="planStore.planData" @navigate="handleNavigate" />
 
 <style scoped>
 .dark button, .dark label {

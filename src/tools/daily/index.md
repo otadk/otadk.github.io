@@ -7,10 +7,12 @@ import { onMounted } from 'vue';
 import { usePlanStore } from '@theme/store/plan'
 import todo from '@theme/components/todo.vue'
 import { useUrlSearchParams } from '@vueuse/core'
+import { useRouter } from 'vitepress'
 import dayjs from 'dayjs'
 
 const planStore = usePlanStore()
 const params = useUrlSearchParams('history')
+const router = useRouter()
 
 onMounted(() => {
   planStore.todoSetup(params?.date)
@@ -32,6 +34,10 @@ const goNext = async () => {
   params.date = newDate
   planStore.todoSetup(newDate)
 }
+
+const goOverview = () => {
+  router.go('/tools/daily/overview')
+}
 </script>
 
 <todo
@@ -40,4 +46,5 @@ const goNext = async () => {
   @save="planStore.updateCurrentTodos"
   @before="goBefore"
   @next="goNext"
+  @overview="goOverview"
 />
