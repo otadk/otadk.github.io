@@ -1,5 +1,6 @@
 ---
 page: true
+title: My Text
 ---
 
 <script setup>

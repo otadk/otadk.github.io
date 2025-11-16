@@ -9,7 +9,7 @@ const nav: ThemeConfig["nav"] = [
     text: "works",
     activeMatch: `^/works/`,
     items: [
-      { text: "Vue Bits Ascii Text", link: "/works/vue-bits-ascii-text" },
+      { text: "Starter", link: "/works/starter" },
       { text: "Greedy Snake", link: "/works/greedy-snake" },
       { text: "Dreams", link: "/works/dreams" },
     ],

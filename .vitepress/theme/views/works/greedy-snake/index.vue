@@ -568,7 +568,6 @@ body {
 .footer-content {
   top: 20%;
   margin-top: 210px;
-  color: #fff;
   font-size: small;
   cursor: default;
 }

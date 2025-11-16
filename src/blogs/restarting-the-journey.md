@@ -7,13 +7,33 @@ After three years, I’ve decided to restart my personal website project. Back i
 
 Here are some snapshots I took this week — just small moments that inspired me and kicked off this week’s journey.  
 
-<table>
-<tr>
-    <td><center><img src="/images/blogs/start-1.jpg" width="90%"><br></center></td>
-    <td><center><img src="/images/blogs/start-2.jpg" width="90%"><br></center></td>
-    <td><center><img src="/images/blogs/start-3.jpg" width="90%"><br></center></td>
-</tr>
-</table>
+<figure class="week-grid">
+  <img src="/images/blogs/start-1.jpg" alt="week highlight 1">
+  <img src="/images/blogs/start-2.jpg" alt="week highlight 2">
+  <img src="/images/blogs/start-3.jpg" alt="week highlight 3">
+</figure>
+
+<style scoped>
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.week-grid img {
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+  border: 1px solid var(--vt-c-divider-light-1);
+  object-fit: cover;
+}
+
+.dark .week-grid img {
+  border-color: var(--vt-c-divider-dark-1);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.45);
+}
+</style>
 
 ## My Technical Journey
 
