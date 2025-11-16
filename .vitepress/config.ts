@@ -42,6 +42,11 @@ const nav: ThemeConfig["nav"] = [
         text: "Building the Foundation: From Structure to Vision",
         link: "/blogs/building-the-foundation",
       },
+      {
+        text: "Crafting the Next Layer: Aesthetics, Automation, and AI Integration",
+        link: "/blogs/crafting-the-next-layer",
+      },
+
     ],
   },
 ];
