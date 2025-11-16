@@ -60,23 +60,23 @@ const handleNavigate = (date: string) => {
   <section class="plan-viewer" aria-live="polite">
     <header class="plan-header">
       <div>
-        <p class="eyebrow">计划时间线</p>
+        <p class="eyebrow">Plan Timeline</p>
         <h2>Plan Data Overview</h2>
         <p class="helper">
-          下方列出全部日期的计划数据，方便快速浏览历史安排与完成度。
+          Browse every recorded date to review workload and completion at a glance.
         </p>
       </div>
       <div class="stats">
         <div class="stat-card">
-          <p class="stat-label">记录天数</p>
+          <p class="stat-label">Days Recorded</p>
           <p class="stat-value">{{ headlineStats.totalDays }}</p>
         </div>
         <div class="stat-card">
-          <p class="stat-label">任务总数</p>
+          <p class="stat-label">Total Tasks</p>
           <p class="stat-value">{{ headlineStats.totalTasks }}</p>
         </div>
         <div class="stat-card accent">
-          <p class="stat-label">整体完成率</p>
+          <p class="stat-label">Overall Completion</p>
           <p class="stat-value">
             {{ headlineStats.completionPercent }}<span class="unit">%</span>
           </p>
@@ -85,7 +85,7 @@ const handleNavigate = (date: string) => {
     </header>
 
     <div v-if="enhancedPlans.length === 0" class="empty-state">
-      <p>暂无 plan 数据，先去创建一个计划吧 ✨</p>
+      <p>No plan data yet — create your first plan ✨</p>
     </div>
     <div v-else class="plan-grid">
       <article
@@ -96,14 +96,14 @@ const handleNavigate = (date: string) => {
         tabindex="0"
         @click="handleNavigate(plan.dateString)"
         @keydown.enter.prevent="handleNavigate(plan.dateString)"
-        :aria-label="`跳转到 ${plan.dateString} 的计划`"
+        :aria-label="`Jump to plan for ${plan.dateString}`"
       >
         <header class="card-header">
           <div>
             <p class="eyebrow">{{ plan.dateString }}</p>
             <h3>
-              {{ plan.total }} 条任务
-              <span class="muted">(完成 {{ plan.completed }})</span>
+              {{ plan.total }} tasks
+              <span class="muted">(done {{ plan.completed }})</span>
             </h3>
           </div>
           <span

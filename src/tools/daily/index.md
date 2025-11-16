@@ -29,13 +29,13 @@ const goBefore = async () => {
 const goNext = async () => {
   await planStore.updateCurrentTodos()
   const current = dayjs(params.date || dayjs())
-  await planStore.updateCurrentTodos()
   const newDate = current.add(1, 'day').format('YYYYMMDD')
   params.date = newDate
   planStore.todoSetup(newDate)
 }
 
 const goOverview = () => {
+  planStore.updateCurrentTodos()
   router.go('/tools/daily/overview')
 }
 </script>
