@@ -48,6 +48,14 @@ export const usePlanStore = defineStore("plan", () => {
     return;
   };
 
+  const persistPlanData = async () => {
+    planData.value.sort((a, b) => a.date - b.date);
+    await localforage.setItem(
+      planStoreConst.PLAN_STORE_KEY,
+      deepUnrefSafe(planData.value)
+    );
+  };
+
   const updateCurrentTodos = async (todos?: TodoItem[]) => {
     if (dateRecord.value === undefined) {
       return;
@@ -65,11 +73,7 @@ export const usePlanStore = defineStore("plan", () => {
         planData.value[aimIndex].tasks = todos;
       }
     }
-    planData.value.sort((a, b) => a.date - b.date);
-    await localforage.setItem(
-      planStoreConst.PLAN_STORE_KEY,
-      deepUnrefSafe(planData.value)
-    );
+    await persistPlanData();
   };
 
   const setup = async () => {
@@ -92,6 +96,13 @@ export const usePlanStore = defineStore("plan", () => {
     a.click();
     URL.revokeObjectURL(url);
   };
+
+  const replacePlanData = async (data: PlanItem[]) => {
+    planData.value = data;
+    await persistPlanData();
+  };
+
+  const getPlanSnapshot = () => deepUnrefSafe(planData.value);
 
   const importPlan = async (event: Event) => {
     const file = (event.target as HTMLInputElement).files?.[0];
@@ -116,10 +127,7 @@ export const usePlanStore = defineStore("plan", () => {
       }
 
       // ✅ 更新 store
-      planData.value = json;
-
-      // ✅ 保存到 localforage
-      await localforage.setItem(planStoreConst.PLAN_STORE_KEY, json);
+      await replacePlanData(json);
     } catch (err: any) {
       console.error("Failed to import plan:", err);
       alert(`导入失败：${err.message}`);
@@ -136,6 +144,8 @@ export const usePlanStore = defineStore("plan", () => {
     clearCache,
     exportPlan,
     importPlan,
+    replacePlanData,
+    getPlanSnapshot,
     ...planStoreConst,
   };
 });
