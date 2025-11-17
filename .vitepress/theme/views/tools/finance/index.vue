@@ -762,12 +762,13 @@ const handleAllDataImport = async (event: Event) => {
 }
 
 .highlight-card {
-  border: none;
-  background: linear-gradient(135deg, rgba(74, 222, 128, 0.25), rgba(59, 130, 246, 0.12));
+  border: 1px solid rgba(129, 140, 248, 0.25);
+  background: rgba(255, 255, 255, 0.96);
 }
 
 .dark .highlight-card {
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(59, 130, 246, 0.15));
+  background: rgba(24, 24, 37, 0.92);
+  border-color: rgba(129, 140, 248, 0.35);
 }
 
 .cash-account-grid {
@@ -778,11 +779,11 @@ const handleAllDataImport = async (event: Event) => {
 }
 
 .cash-account {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.98);
   border-radius: 14px;
   padding: 1rem;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
@@ -798,19 +799,20 @@ const handleAllDataImport = async (event: Event) => {
 }
 
 .dark .cash-account {
-  background: rgba(15, 23, 42, 0.6);
-  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(24, 24, 37, 0.9);
+  border-color: rgba(165, 180, 252, 0.35);
   color: var(--vt-c-text-dark-1);
   box-shadow: none;
 }
 
 .investments-card {
-  border: none;
-  background: linear-gradient(135deg, rgba(129, 140, 248, 0.18), rgba(96, 165, 250, 0.12));
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  background: rgba(255, 255, 255, 0.96);
 }
 
 .dark .investments-card {
-  background: linear-gradient(135deg, rgba(129, 140, 248, 0.25), rgba(14, 165, 233, 0.15));
+  background: rgba(24, 24, 37, 0.92);
+  border-color: rgba(99, 102, 241, 0.3);
 }
 
 .investment-overview {
@@ -821,7 +823,7 @@ const handleAllDataImport = async (event: Event) => {
 }
 
 .investment-card {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.98);
   border-radius: 14px;
   padding: 0.85rem;
   border: 1px solid rgba(15, 23, 42, 0.08);
@@ -831,25 +833,22 @@ const handleAllDataImport = async (event: Event) => {
 }
 
 .investment-card.total {
-  background: linear-gradient(120deg, #fef3c7, #fde68a);
-  border: none;
-  color: #854d0e;
+  border-color: rgba(244, 63, 94, 0.25);
 }
 
 .dark .investment-card {
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(24, 24, 37, 0.9);
   border-color: rgba(255, 255, 255, 0.08);
   color: var(--vt-c-text-dark-1);
 }
 
 .dark .investment-card.total {
-  color: #fcd34d;
-  background: linear-gradient(120deg, rgba(217, 119, 6, 0.3), rgba(251, 191, 36, 0.25));
+  border-color: rgba(244, 63, 94, 0.35);
 }
 
 .investment-record-card {
-  border: none;
-  background: linear-gradient(135deg, rgba(244, 114, 182, 0.18), rgba(192, 132, 252, 0.15));
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  background: rgba(255, 255, 255, 0.96);
 }
 
 .investment-record-form {
@@ -877,15 +876,15 @@ const handleAllDataImport = async (event: Event) => {
   padding: 0.7rem;
   border: none;
   border-radius: 12px;
-  background: linear-gradient(120deg, #a855f7, #ec4899);
-  color: #fff;
+  background: linear-gradient(120deg, rgba(99, 102, 241, 0.85), rgba(147, 51, 234, 0.8));
+  color: #f5f3ff;
   font-weight: 600;
   cursor: pointer;
 }
 
 .data-card {
-  border: none;
-  background: linear-gradient(135deg, rgba(20, 184, 166, 0.18), rgba(59, 130, 246, 0.12));
+  border: 1px solid rgba(129, 140, 248, 0.25);
+  background: rgba(255, 255, 255, 0.96);
 }
 
 .data-actions {
@@ -899,13 +898,13 @@ const handleAllDataImport = async (event: Event) => {
   border: none;
   border-radius: 12px;
   padding: 0.65rem 1.2rem;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(248, 250, 255, 0.92);
   cursor: pointer;
   font-weight: 600;
 }
 
 .dark .data-actions button {
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(30, 27, 75, 0.7);
   color: var(--vt-c-text-dark-1);
 }
 
@@ -920,12 +919,13 @@ const handleAllDataImport = async (event: Event) => {
 }
 
 .entry-card {
-  border: none;
-  background: linear-gradient(135deg, rgba(14, 165, 233, 0.16), rgba(59, 130, 246, 0.24));
+  border: 1px solid rgba(129, 140, 248, 0.25);
+  background: rgba(255, 255, 255, 0.96);
 }
 
 .dark .entry-card {
-  background: linear-gradient(135deg, rgba(14, 165, 233, 0.25), rgba(37, 99, 235, 0.28));
+  background: rgba(24, 24, 37, 0.92);
+  border-color: rgba(129, 140, 248, 0.35);
 }
 
 .amount-chip {
@@ -937,36 +937,36 @@ const handleAllDataImport = async (event: Event) => {
   border: none;
   font-weight: 600;
   font-size: 1.1rem;
-  color: #0f172a;
-  background: linear-gradient(120deg, rgba(59, 130, 246, 0.2), rgba(14, 165, 233, 0.35));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  color: #b91c1c;
+  background: linear-gradient(120deg, rgba(248, 113, 113, 0.45), rgba(239, 68, 68, 0.35));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
   width: 100%;
   cursor: default;
 }
 
 .amount-chip.negative {
-  color: #991b1b;
-  background: linear-gradient(120deg, rgba(248, 113, 113, 0.45), rgba(244, 63, 94, 0.35));
+  color: #14532d;
+  background: linear-gradient(120deg, rgba(134, 239, 172, 0.5), rgba(16, 185, 129, 0.4));
 }
 
 .investment-card.total .amount-chip {
-  color: #7c2d12;
-  background: linear-gradient(120deg, rgba(251, 191, 36, 0.5), rgba(249, 115, 22, 0.4));
+  color: #b91c1c;
+  background: linear-gradient(120deg, rgba(248, 113, 113, 0.5), rgba(239, 68, 68, 0.4));
 }
 
 .dark .amount-chip {
   color: var(--vt-c-text-dark-1);
-  background: linear-gradient(120deg, rgba(59, 130, 246, 0.35), rgba(14, 165, 233, 0.45));
+  background: linear-gradient(120deg, rgba(248, 113, 113, 0.4), rgba(239, 68, 68, 0.35));
   box-shadow: none;
 }
 .dark .amount-chip.negative {
-  color: #fecaca;
-  background: linear-gradient(120deg, rgba(248, 113, 113, 0.35), rgba(248, 113, 113, 0.25));
+  color: #bbf7d0;
+  background: linear-gradient(120deg, rgba(34, 197, 94, 0.35), rgba(16, 185, 129, 0.3));
 }
 
 .dark .investment-card.total .amount-chip {
-  color: #fde68a;
-  background: linear-gradient(120deg, rgba(251, 189, 35, 0.45), rgba(234, 88, 12, 0.45));
+  color: #fecdd3;
+  background: linear-gradient(120deg, rgba(248, 113, 113, 0.45), rgba(239, 68, 68, 0.4));
 }
 
 .entry-form {
@@ -1001,8 +1001,8 @@ const handleAllDataImport = async (event: Event) => {
   border: none;
   border-radius: 12px;
   padding: 0.9rem;
-  background: linear-gradient(120deg, #4ade80, #22d3ee);
-  color: #0b1b1d;
+  background: linear-gradient(120deg, rgba(79, 70, 229, 0.85), rgba(147, 51, 234, 0.85));
+  color: #f8fafc;
   font-weight: 600;
   cursor: pointer;
 }
