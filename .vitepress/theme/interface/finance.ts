@@ -16,7 +16,22 @@ export interface FinanceEntry {
   amount: number;
 }
 
+export interface SnapshotNotes {
+  wechat?: string;
+  alipay?: string;
+  bank?: string;
+  "cs-cash"?: string;
+  usd?: string;
+  "cs-investment"?: string;
+  "pv-project"?: string;
+  loan?: string;
+}
+
 export interface InvestmentValues {
+  wechat: number;
+  alipay: number;
+  bank: number;
+  "cs-cash": number;
   usd: number;
   "cs-investment": number;
   "pv-project": number;
@@ -25,6 +40,7 @@ export interface InvestmentValues {
 
 export interface InvestmentSnapshot extends InvestmentValues {
   date: string; // YYYY-MM-DD
+  notes?: SnapshotNotes;
 }
 
 export interface FinanceSettings {

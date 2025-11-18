@@ -1,13 +1,7 @@
 <script lang="ts" setup>
 import { computed, onMounted, reactive, ref, watch } from "vue";
 import dayjs from "dayjs";
-import type {
-  CashAccount,
-  FinanceChannel,
-  FinanceEntry,
-  FinanceType,
-  InvestmentAccount,
-} from "@theme/interface/finance";
+import type { InvestmentSnapshot, SnapshotNotes } from "@theme/interface/finance";
 import { useFinanceStore } from "@theme/store/finance";
 import { usePlanStore } from "@theme/store/plan";
 import { storeToRefs } from "pinia";
@@ -15,172 +9,156 @@ import { storeToRefs } from "pinia";
 const financeStore = useFinanceStore();
 const planStore = usePlanStore();
 const {
-  entries,
-  monthlySummaries,
-  cashBreakdown,
-  currentInvestment,
-  latestInvestmentSnapshot,
   investmentHistory,
+  latestInvestmentSnapshot,
+  currentCash,
+  currentInvestment,
+  settings,
 } = storeToRefs(financeStore);
 const today = dayjs().format("YYYY-MM-DD");
 
-const cashAccountOptions: { value: CashAccount; label: string }[] = [
-  { value: "wechat", label: "微信" },
-  { value: "alipay", label: "支付宝" },
-  { value: "bank", label: "银行卡" },
-  { value: "cs-cash", label: "CS账户现金" },
+const cashFields: Array<{
+  label: string;
+  formKey: keyof typeof investmentRecordForm;
+  noteKey: keyof typeof investmentRecordForm;
+  snapshotKey: SnapshotNumberKey;
+}> = [
+  { label: "微信", formKey: "wechat", noteKey: "wechatNote", snapshotKey: "wechat" },
+  { label: "支付宝", formKey: "alipay", noteKey: "alipayNote", snapshotKey: "alipay" },
+  { label: "银行卡", formKey: "bank", noteKey: "bankNote", snapshotKey: "bank" },
+  { label: "CS 账户现金", formKey: "csCash", noteKey: "csCashNote", snapshotKey: "cs-cash" },
 ];
 
-const investmentAccountOptions: { value: InvestmentAccount; label: string }[] =
-  [
-    { value: "usd", label: "美元" },
-    { value: "cs-investment", label: "CS投资市值" },
-    { value: "pv-project", label: "光伏项目" },
-  ];
+const investmentFields: Array<{
+  label: string;
+  formKey: keyof typeof investmentRecordForm;
+  noteKey: keyof typeof investmentRecordForm;
+  snapshotKey: SnapshotNumberKey;
+  allowNegative?: boolean;
+}> = [
+  { label: "美元", formKey: "usd", noteKey: "usdNote", snapshotKey: "usd" },
+  { label: "CS 投资市值", formKey: "csInvestment", noteKey: "csInvestmentNote", snapshotKey: "cs-investment" },
+  { label: "光伏项目", formKey: "pvProject", noteKey: "pvProjectNote", snapshotKey: "pv-project" },
+  { label: "贷款", formKey: "loan", noteKey: "loanNote", snapshotKey: "loan", allowNegative: true },
+];
 
-const accountLabelMap = [
-  ...cashAccountOptions,
-  ...investmentAccountOptions,
-].reduce<Record<string, string>>((acc, item) => {
-  acc[item.value] = item.label;
-  return acc;
-}, {});
-
-const formState = reactive({
-  id: "",
-  date: today,
-  type: "expense" as FinanceType,
-  channel: "cash" as FinanceChannel,
-  account: cashAccountOptions[0].value as CashAccount,
-  amount: 0,
-  description: "",
-});
+type SnapshotNumberKey = Exclude<keyof InvestmentSnapshot, "date" | "notes">;
 
 const investmentRecordForm = reactive({
   date: today,
+  wechat: 0,
+  wechatNote: "",
+  alipay: 0,
+  alipayNote: "",
+  bank: 0,
+  bankNote: "",
+  csCash: 0,
+  csCashNote: "",
   usd: 0,
+  usdNote: "",
   csInvestment: 0,
+  csInvestmentNote: "",
   pvProject: 0,
+  pvProjectNote: "",
   loan: 0,
+  loanNote: "",
 });
 
-const selectedDate = ref(today);
-const selectedMonth = ref(dayjs().format("YYYY-MM"));
+const limitedHistory = computed(() => investmentHistory.value.slice(0, 60));
 
-const accountOptions = computed(() =>
-  formState.channel === "cash"
-    ? cashAccountOptions
-    : investmentAccountOptions
-);
-
-onMounted(() => {
-  financeStore.setup();
+onMounted(async () => {
+  await financeStore.setup();
   planStore.setup();
+  fillFromHistory();
 });
 
-let allowAutoFillInvestment = true;
-const fillInvestmentRecordFromHistory = () => {
-  if (!allowAutoFillInvestment) {
-    return;
-  }
+let allowAutoFill = true;
+const fillFromHistory = () => {
+  if (!allowAutoFill) return;
   const history = investmentHistory.value;
-  if (!history.length) {
-    return;
-  }
-  const targetDate = dayjs(investmentRecordForm.date);
-  const previous =
-    history.find((item) => dayjs(item.date).isBefore(targetDate)) ??
-    history[0];
-  investmentRecordForm.usd = previous.usd;
-  investmentRecordForm.csInvestment = previous["cs-investment"];
-  investmentRecordForm.pvProject = previous["pv-project"];
-  investmentRecordForm.loan = previous.loan ?? 0;
-  allowAutoFillInvestment = false;
+  if (!history.length) return;
+  const targetDate = investmentRecordForm.date;
+  const exact = history.find((item) => item.date === targetDate);
+  const targetMoment = dayjs(targetDate);
+  const prev =
+    exact ?? history.find((item) => dayjs(item.date).isBefore(targetMoment)) ?? history[0];
+  if (!prev) return;
+  investmentRecordForm.wechat = prev.wechat ?? 0;
+  investmentRecordForm.alipay = prev.alipay ?? 0;
+  investmentRecordForm.bank = prev.bank ?? 0;
+  investmentRecordForm.csCash = prev["cs-cash"] ?? 0;
+  investmentRecordForm.usd = prev.usd ?? 0;
+  investmentRecordForm.csInvestment = prev["cs-investment"] ?? 0;
+  investmentRecordForm.pvProject = prev["pv-project"] ?? 0;
+  investmentRecordForm.loan = prev.loan ?? 0;
+  investmentRecordForm.wechatNote = "";
+  investmentRecordForm.alipayNote = "";
+  investmentRecordForm.bankNote = "";
+  investmentRecordForm.csCashNote = "";
+  investmentRecordForm.usdNote = "";
+  investmentRecordForm.csInvestmentNote = "";
+  investmentRecordForm.pvProjectNote = "";
+  investmentRecordForm.loanNote = "";
+  allowAutoFill = false;
 };
 
 watch(
   [investmentHistory, () => investmentRecordForm.date],
   () => {
-    allowAutoFillInvestment = true;
-    fillInvestmentRecordFromHistory();
+    allowAutoFill = true;
+    fillFromHistory();
   },
   { immediate: true }
 );
 
-const markInvestmentManual = () => {
-  allowAutoFillInvestment = false;
+const markManual = () => {
+  allowAutoFill = false;
 };
 
-watch(
-  monthlySummaries,
-  (list) => {
-    if (!list.length) {
-      selectedMonth.value = dayjs().format("YYYY-MM");
-      return;
-    }
-    const exists = list.some((item) => item.month === selectedMonth.value);
-    if (!exists) {
-      selectedMonth.value = list[0].month;
-    }
-  },
-  { immediate: true }
-);
-
-watch(
-  () => formState.channel,
-  (channel) => {
-    const options = channel === "cash" ? cashAccountOptions : investmentAccountOptions;
-    if (!options.some((item) => item.value === formState.account)) {
-      formState.account = options[0]?.value as CashAccount;
-    }
-  }
-);
-
-const dailyEntries = computed(() =>
-  entries.value.filter((item) => item.date === selectedDate.value)
-);
-const monthlyOptions = computed(() =>
-  monthlySummaries.value.map((item) => item.month)
-);
-const cashTotal = computed(() =>
-  Object.values(cashBreakdown.value || {}).reduce(
-    (sum, val) => sum + (val || 0),
-    0
-  )
-);
-const dailySummary = computed(() =>
-  dailyEntries.value.reduce(
-    (acc, entry) => {
-      if (entry.type === "income") {
-        acc.income += entry.amount;
-      } else {
-        acc.expense += entry.amount;
-      }
-      acc.net = acc.income - acc.expense;
-      return acc;
+const handleRecordSubmit = async () => {
+  const snapshot: InvestmentSnapshot = {
+    date: investmentRecordForm.date,
+    wechat: investmentRecordForm.wechat || 0,
+    alipay: investmentRecordForm.alipay || 0,
+    bank: investmentRecordForm.bank || 0,
+    "cs-cash": investmentRecordForm.csCash || 0,
+    usd: investmentRecordForm.usd || 0,
+    "cs-investment": investmentRecordForm.csInvestment || 0,
+    "pv-project": investmentRecordForm.pvProject || 0,
+    loan: investmentRecordForm.loan || 0,
+    notes: {
+      wechat: investmentRecordForm.wechatNote?.trim() || undefined,
+      alipay: investmentRecordForm.alipayNote?.trim() || undefined,
+      bank: investmentRecordForm.bankNote?.trim() || undefined,
+      "cs-cash": investmentRecordForm.csCashNote?.trim() || undefined,
+      usd: investmentRecordForm.usdNote?.trim() || undefined,
+      "cs-investment": investmentRecordForm.csInvestmentNote?.trim() || undefined,
+      "pv-project": investmentRecordForm.pvProjectNote?.trim() || undefined,
+      loan: investmentRecordForm.loanNote?.trim() || undefined,
     },
-    { income: 0, expense: 0, net: 0 }
-  )
-);
-
-const selectedMonthlySummary = computed(() =>
-  monthlySummaries.value.find((item) => item.month === selectedMonth.value)
-);
-
-const showAlert = (message: string) => {
-  if (typeof window !== "undefined" && typeof window.alert === "function") {
-    window.alert(message);
-  } else {
-    console.warn(message);
-  }
+  };
+  await financeStore.addInvestmentSnapshot(snapshot);
+  allowAutoFill = false;
 };
 
-const showConfirm = (message: string) => {
-  if (typeof window !== "undefined" && typeof window.confirm === "function") {
-    return window.confirm(message);
+const latestSnapshot = computed<InvestmentSnapshot>(() => {
+  if (latestInvestmentSnapshot.value) {
+    return latestInvestmentSnapshot.value;
   }
-  return true;
-};
+  const v = settings.value.investmentValues;
+  return {
+    date: dayjs().format("YYYY-MM-DD"),
+    wechat: v.wechat,
+    alipay: v.alipay,
+    bank: v.bank,
+    "cs-cash": v["cs-cash"],
+    usd: v.usd,
+    "cs-investment": v["cs-investment"],
+    "pv-project": v["pv-project"],
+    loan: v.loan,
+    notes: {},
+  } as InvestmentSnapshot;
+});
 
 const formatCurrency = (value: number, withSign = false) => {
   const normalized = Number(value) || 0;
@@ -195,92 +173,20 @@ const formatCurrency = (value: number, withSign = false) => {
   return `¥${formatted}`;
 };
 
-const monthlyReportText = computed(() => {
-  const summary = selectedMonthlySummary.value;
-  if (!summary) return "这个月还没有记录，快来补充一笔吧。";
-  const trend = summary.net >= 0 ? "盈余" : "赤字";
-  const cashFlow =
-    summary.cashChannelFlow >= 0 ? "现金净流入" : "现金净流出较多";
-  const investmentFlow =
-    summary.investmentChannelFlow >= 0
-      ? "理财仓位整体上升"
-      : "理财仓位有所回落";
-  return `${summary.month} 的净现金流为 ${formatCurrency(
-    summary.net
-  )}，本月${trend}。${cashFlow}，${investmentFlow}，记得在月底回顾一下支出结构。`;
-});
+const amountClass = (value: number) => (value >= 0 ? "positive" : "negative");
+const getSnapshotValue = (snapshot: InvestmentSnapshot, key: SnapshotNumberKey) => snapshot[key] ?? 0;
+const getNote = (notes: SnapshotNotes | undefined, key: keyof SnapshotNotes) => notes?.[key];
 
-const resetForm = (date = selectedDate.value) => {
-  formState.id = "";
-  formState.date = date;
-  formState.type = "expense";
-  formState.channel = "cash";
-  formState.account = cashAccountOptions[0].value;
-  formState.amount = 0;
-  formState.description = "";
-};
-
-const startEdit = (entry: FinanceEntry) => {
-  formState.id = entry.id;
-  formState.date = entry.date;
-  formState.type = entry.type;
-  formState.channel = entry.channel;
-  formState.account = entry.account as CashAccount;
-  formState.amount = entry.amount;
-  formState.description = entry.note || "";
-  selectedDate.value = entry.date;
-  selectedMonth.value = dayjs(entry.date).format("YYYY-MM");
-};
-
-const handleSubmit = async () => {
-  if (!formState.amount || formState.amount <= 0) {
-    showAlert("请输入大于 0 的金额");
-    return;
-  }
-
-  const payload = {
-    date: formState.date,
-    type: formState.type as FinanceType,
-    channel: formState.channel as FinanceChannel,
-    account: formState.account,
-    amount: Number(formState.amount),
-    note: formState.description.trim() || undefined,
-  };
-
-  if (formState.id) {
-    await financeStore.updateEntry({ id: formState.id, ...payload });
-  } else {
-    await financeStore.addEntry(payload);
-  }
-  selectedDate.value = payload.date;
-  selectedMonth.value = dayjs(payload.date).format("YYYY-MM");
-  resetForm(payload.date);
-};
-
-const handleDelete = async (entry: FinanceEntry) => {
-  if (!showConfirm("确认要删除这条记录吗？")) return;
-  await financeStore.removeEntry(entry.id);
-};
-
-const ledgerPreview = computed(() => entries.value.slice(0, 20));
-
-const handleInvestmentRecord = async () => {
-  const snapshot = {
-    date: investmentRecordForm.date,
-    usd: investmentRecordForm.usd || 0,
-    "cs-investment": investmentRecordForm.csInvestment || 0,
-    "pv-project": investmentRecordForm.pvProject || 0,
-    loan: investmentRecordForm.loan || 0,
-  };
-  await financeStore.addInvestmentSnapshot(snapshot);
-  allowAutoFillInvestment = false;
-};
+const historyFields = [
+  ...cashFields.map((field) => ({ label: field.label, key: field.snapshotKey })),
+  ...investmentFields.map((field) => ({ label: field.label, key: field.snapshotKey })),
+];
 
 const allDataInputRef = ref<HTMLInputElement | null>(null);
 
 const exportAllData = () => {
   const payload = {
-    version: 1,
+    version: 2,
     generatedAt: new Date().toISOString(),
     plan: planStore.getPlanSnapshot(),
     finance: financeStore.getFinanceSnapshot(),
@@ -291,7 +197,7 @@ const exportAllData = () => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `planner-finance-${dayjs().format("YYYYMMDD-HHmmss")}.json`;
+  a.download = `finance-records-${dayjs().format("YYYYMMDD-HHmmss")}.json`;
   a.click();
   URL.revokeObjectURL(url);
 };
@@ -302,9 +208,7 @@ const triggerAllImport = () => {
 
 const handleAllDataImport = async (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0];
-  if (!file) {
-    return;
-  }
+  if (!file) return;
   try {
     const text = await file.text();
     const json = JSON.parse(text);
@@ -314,10 +218,9 @@ const handleAllDataImport = async (event: Event) => {
     if (json.finance) {
       await financeStore.replaceFinanceData(json.finance);
     }
-    showAlert("导入成功，数据已更新。");
+    alert("导入成功，数据已更新。");
   } catch (err: any) {
-    console.error(err);
-    showAlert(`导入失败：${err?.message || err}`);
+    alert(`导入失败：${err?.message || err}`);
   } finally {
     (event.target as HTMLInputElement).value = "";
   }
@@ -331,24 +234,31 @@ const handleAllDataImport = async (event: Event) => {
         <div class="card-header">
           <div>
             <h2>现金概览</h2>
-            <p>所有现金账户仅能通过流水变动</p>
+            <p>追踪所有现金账户的快照</p>
           </div>
           <span class="chip">
             现金合计
-            <strong>{{ formatCurrency(cashTotal, true) }}</strong>
+            <strong>{{ formatCurrency(currentCash, true) }}</strong>
           </span>
         </div>
-
         <div class="cash-account-grid">
           <article
-            v-for="option in cashAccountOptions"
-            :key="option.value"
+            v-for="field in cashFields"
+            :key="field.formKey"
             class="cash-account"
           >
-            <span class="cash-label">{{ option.label }}</span>
-            <button type="button" class="amount-chip">
-              {{ formatCurrency(cashBreakdown?.[option.value] || 0, true) }}
-            </button>
+            <span class="cash-label">{{ field.label }}</span>
+            <span
+              :class="['amount-pill', amountClass(getSnapshotValue(latestSnapshot, field.snapshotKey))]"
+            >
+              {{ formatCurrency(getSnapshotValue(latestSnapshot, field.snapshotKey), true) }}
+            </span>
+            <small
+              v-if="getNote(latestSnapshot.notes, field.noteKey as keyof SnapshotNotes)"
+              class="note-text"
+            >
+              {{ getNote(latestSnapshot.notes, field.noteKey as keyof SnapshotNotes) }}
+            </small>
           </article>
         </div>
       </div>
@@ -357,327 +267,127 @@ const handleAllDataImport = async (event: Event) => {
         <div class="card-header">
           <div>
             <h3>理财资产</h3>
-            <p>展示最近一次的理财估值</p>
+            <p>最近一次记录：{{ latestSnapshot.date }}</p>
           </div>
-          <small v-if="latestInvestmentSnapshot">
-            最近更新：{{ latestInvestmentSnapshot.date }}
-          </small>
         </div>
-
         <div class="investment-overview">
-          <article class="investment-card">
-            <span>美元</span>
-            <button type="button" class="amount-chip">
-              {{ formatCurrency(latestInvestmentSnapshot?.usd || 0, true) }}
-            </button>
-          </article>
-          <article class="investment-card">
-            <span>CS 投资市值</span>
-            <button type="button" class="amount-chip">
-              {{ formatCurrency(latestInvestmentSnapshot?.["cs-investment"] || 0, true) }}
-            </button>
-          </article>
-          <article class="investment-card">
-            <span>光伏项目估值</span>
-            <button type="button" class="amount-chip">
-              {{ formatCurrency(latestInvestmentSnapshot?.["pv-project"] || 0, true) }}
-            </button>
-          </article>
-          <article class="investment-card loan">
-            <span>贷款</span>
-            <button type="button" class="amount-chip negative">
-              {{ formatCurrency(latestInvestmentSnapshot?.loan || 0, true) }}
-            </button>
+          <article
+            v-for="field in investmentFields"
+            :key="field.formKey"
+            class="investment-card"
+          >
+            <span>{{ field.label }}</span>
+            <span :class="['amount-pill', amountClass(getSnapshotValue(latestSnapshot, field.snapshotKey))]">
+              {{ formatCurrency(getSnapshotValue(latestSnapshot, field.snapshotKey), true) }}
+            </span>
+            <small
+              v-if="getNote(latestSnapshot.notes, field.snapshotKey as keyof SnapshotNotes)"
+              class="note-text"
+            >
+              {{ getNote(latestSnapshot.notes, field.snapshotKey as keyof SnapshotNotes) }}
+            </small>
           </article>
           <article class="investment-card total">
             <span>理财合计</span>
-            <button type="button" class="amount-chip">
+            <span :class="['amount-pill', amountClass(currentInvestment)]">
               {{ formatCurrency(currentInvestment, true) }}
-            </button>
+            </span>
           </article>
         </div>
       </div>
     </section>
 
-    <section class="finance-card entry-card">
-      <header class="entry-header">
-        <div>
-          <h3>{{ formState.id ? "更新交易" : "新增交易" }}</h3>
-          <p>每天记录一次现金或理财的真实变动</p>
-        </div>
-        <button v-if="formState.id" type="button" @click="resetForm()">
-          取消编辑
-        </button>
-      </header>
-      <form class="entry-form" @submit.prevent="handleSubmit">
-        <label>
-          日期
-          <input type="date" v-model="formState.date" />
-        </label>
-
-        <label>
-          类型
-          <select v-model="formState.type">
-            <option value="expense">支出</option>
-            <option value="income">收入</option>
-          </select>
-        </label>
-
-        <label>
-          渠道
-          <select v-model="formState.channel">
-            <option value="cash">现金</option>
-            <option value="investment">理财</option>
-          </select>
-        </label>
-
-        <label>
-          账户
-          <select v-model="formState.account">
-            <option
-              v-for="option in accountOptions"
-              :key="option.value"
-              :value="option.value"
-            >
-              {{ option.label }}
-            </option>
-          </select>
-        </label>
-
-        <label>
-          金额
-          <input type="number" min="0" step="0.01" v-model.number="formState.amount" />
-        </label>
-
-        <label class="note-field">
-          描述（选填）
-          <textarea
-            rows="2"
-            placeholder="例如：午餐、工资备注等"
-            v-model.trim="formState.description"
-          />
-        </label>
-
-        <button class="submit" type="submit">
-          {{ formState.id ? "更新交易" : "保存交易" }}
-        </button>
-      </form>
-    </section>
-
-    <section class="finance-card investment-record-card">
+    <section class="finance-card record-card">
       <header class="section-header">
         <div>
-          <h3>记录理财资产</h3>
-          <p>每日录入美元 / CS / 光伏估值</p>
+          <h3>记录每日资产</h3>
+          <p>填写现金与理财数值，可为每个字段添加备注</p>
         </div>
-        <small v-if="latestInvestmentSnapshot">
-          最新：{{ latestInvestmentSnapshot.date }}
-        </small>
       </header>
-      <form class="investment-record-form" @submit.prevent="handleInvestmentRecord">
+      <form class="record-form" @submit.prevent="handleRecordSubmit">
         <label>
           日期
           <input type="date" v-model="investmentRecordForm.date" />
         </label>
-        <label>
-          美元
+        <label v-for="field in cashFields" :key="`cash-${field.formKey}`">
+          {{ field.label }}
           <input
             type="number"
             min="0"
-            v-model.number="investmentRecordForm.usd"
-            @input="markInvestmentManual"
+            step="0.01"
+            v-model.number="investmentRecordForm[field.formKey]"
+            @input="markManual"
+          />
+          <textarea
+            rows="1"
+            class="note-textarea"
+            placeholder="备注（选填）"
+            v-model.trim="investmentRecordForm[field.noteKey]"
+            @input="markManual"
           />
         </label>
-        <label>
-          CS 市值
+        <label v-for="field in investmentFields" :key="`inv-${field.formKey}`">
+          {{ field.label }}
           <input
             type="number"
-            min="0"
-            v-model.number="investmentRecordForm.csInvestment"
-            @input="markInvestmentManual"
+            :min="field.allowNegative ? undefined : 0"
+            step="0.01"
+            v-model.number="investmentRecordForm[field.formKey]"
+            @input="markManual"
+          />
+          <textarea
+            rows="1"
+            class="note-textarea"
+            placeholder="备注（选填）"
+            v-model.trim="investmentRecordForm[field.noteKey]"
+            @input="markManual"
           />
         </label>
-        <label>
-          光伏
-          <input
-            type="number"
-            min="0"
-            v-model.number="investmentRecordForm.pvProject"
-            @input="markInvestmentManual"
-          />
-        </label>
-        <label>
-          贷款（请输入负数）
-          <input
-            type="number"
-            v-model.number="investmentRecordForm.loan"
-            @input="markInvestmentManual"
-          />
-        </label>
-        <button type="submit">保存今天的理财估值</button>
+        <button type="submit">保存记录</button>
       </form>
     </section>
 
-    <section class="finance-card daily-card">
+    <section class="finance-card history-card">
       <header class="section-header">
         <div>
-          <h3>每日流水</h3>
-          <p>随时翻看任意一天的收入与支出</p>
-        </div>
-        <input type="date" v-model="selectedDate" />
-      </header>
-
-      <div class="daily-summary">
-        <div>
-          <p>收入</p>
-          <strong>{{ formatCurrency(dailySummary.income) }}</strong>
-        </div>
-        <div>
-          <p>支出</p>
-          <strong>{{ formatCurrency(dailySummary.expense) }}</strong>
-        </div>
-        <div>
-          <p>净额</p>
-          <strong :class="{ positive: dailySummary.net >= 0, negative: dailySummary.net < 0 }">
-            {{ formatCurrency(dailySummary.net, true) }}
-          </strong>
-        </div>
-      </div>
-
-      <ul class="record-list" v-if="dailyEntries.length">
-        <li v-for="entry in dailyEntries" :key="entry.id">
-          <div class="record-info">
-            <strong>{{ accountLabelMap[entry.account] }}</strong>
-            <span class="record-meta">
-              {{ entry.channel === "cash" ? "现金" : "理财" }} ·
-              {{ entry.type === "income" ? "收入" : "支出" }}
-            </span>
-            <small v-if="entry.note">{{ entry.note }}</small>
-          </div>
-          <div class="record-actions">
-            <span :class="entry.type === 'income' ? 'positive' : 'negative'">
-              {{ entry.type === "income" ? "+" : "-" }}
-              {{ formatCurrency(entry.amount, false) }}
-            </span>
-            <button type="button" @click="startEdit(entry)">编辑</button>
-            <button type="button" @click="handleDelete(entry)">删除</button>
-          </div>
-        </li>
-      </ul>
-      <p v-else class="empty">这一天还没有记录。</p>
-    </section>
-
-    <section class="finance-card monthly-card">
-      <header class="section-header">
-        <div>
-          <h3>每月现金流</h3>
-          <p>快速了解每个月的现金动向</p>
+          <h3>历史记录</h3>
+          <p>最近 {{ limitedHistory.length }} 条资产快照</p>
         </div>
       </header>
-
-      <div v-if="monthlySummaries.length" class="month-grid">
-        <div v-for="summary in monthlySummaries" :key="summary.month" class="month-card">
-          <strong>{{ summary.month }}</strong>
-          <p>收入：{{ formatCurrency(summary.income) }}</p>
-          <p>支出：{{ formatCurrency(summary.expense) }}</p>
-          <p :class="{ positive: summary.net >= 0, negative: summary.net < 0 }">
-            净流：{{ formatCurrency(summary.net) }}
-          </p>
-          <small>
-            现金 {{ summary.cashChannelFlow >= 0 ? "↑" : "↓" }}
-            {{ formatCurrency(summary.cashChannelFlow) }}
-          </small>
-          <small>
-            理财 {{ summary.investmentChannelFlow >= 0 ? "↑" : "↓" }}
-            {{ formatCurrency(summary.investmentChannelFlow) }}
-          </small>
-        </div>
-      </div>
-      <p v-else class="empty">尚无月度统计。</p>
-    </section>
-
-    <section class="finance-card report-card">
-      <header class="section-header">
-        <div>
-          <h3>月度报告</h3>
-          <p>月底生成一段简单总结，辅助复盘</p>
-        </div>
-        <select v-model="selectedMonth">
-          <option v-for="month in monthlyOptions" :key="month" :value="month">
-            {{ month }}
-          </option>
-        </select>
-      </header>
-      <p class="report-text">{{ monthlyReportText }}</p>
-      <div class="report-stats" v-if="selectedMonthlySummary">
-        <div>
-          <p>收入</p>
-          <strong>{{ formatCurrency(selectedMonthlySummary.income) }}</strong>
-        </div>
-        <div>
-          <p>支出</p>
-          <strong>{{ formatCurrency(selectedMonthlySummary.expense) }}</strong>
-        </div>
-        <div>
-          <p>净额</p>
-          <strong
-            :class="{
-              positive: selectedMonthlySummary.net >= 0,
-              negative: selectedMonthlySummary.net < 0,
-            }"
-            >{{ formatCurrency(selectedMonthlySummary.net) }}</strong
-          >
-        </div>
-      </div>
-    </section>
-
-    <section class="finance-card ledger-card">
-      <header class="section-header">
-        <div>
-          <h3>最新流水</h3>
-          <p>最近 20 条记录，支持快速操作</p>
-        </div>
-      </header>
-      <div class="table-wrapper" v-if="ledgerPreview.length">
+      <div class="table-wrapper" v-if="limitedHistory.length">
         <table>
           <thead>
             <tr>
               <th>日期</th>
-              <th>渠道</th>
-              <th>账户</th>
-              <th>类型</th>
-              <th>金额</th>
-              <th>描述</th>
-              <th></th>
+              <th v-for="field in historyFields" :key="field.key">{{ field.label }}</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="entry in ledgerPreview" :key="entry.id">
-              <td>{{ entry.date }}</td>
-              <td>{{ entry.channel === "cash" ? "现金" : "理财" }}</td>
-              <td>{{ accountLabelMap[entry.account] }}</td>
-              <td>{{ entry.type === "income" ? "收入" : "支出" }}</td>
-              <td :class="entry.type === 'income' ? 'positive' : 'negative'">
-                {{ entry.type === "income" ? "+" : "-" }}
-                {{ formatCurrency(entry.amount, false) }}
-              </td>
-              <td>{{ entry.note || "-" }}</td>
-              <td class="table-actions">
-                <button type="button" @click="startEdit(entry)">编辑</button>
-                <button type="button" @click="handleDelete(entry)">删除</button>
+            <tr v-for="snapshot in limitedHistory" :key="snapshot.date">
+              <td>{{ snapshot.date }}</td>
+              <td v-for="field in historyFields" :key="field.key">
+                <span :class="['amount-pill', amountClass(getSnapshotValue(snapshot, field.key as SnapshotNumberKey))]">
+                  {{ formatCurrency(getSnapshotValue(snapshot, field.key as SnapshotNumberKey), true) }}
+                </span>
+                <p
+                  v-if="getNote(snapshot.notes, field.key as keyof SnapshotNotes)"
+                  class="history-note"
+                >
+                  {{ getNote(snapshot.notes, field.key as keyof SnapshotNotes) }}
+                </p>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-      <p v-else class="empty">还没有任何记录。</p>
+      <p v-else class="empty">暂无记录，先保存一条吧。</p>
     </section>
 
     <section class="finance-card data-card">
       <header class="section-header">
         <div>
           <h3>数据导入导出</h3>
-          <p>一次性备份或恢复计划与理财数据</p>
+          <p>备份或恢复计划与资产记录</p>
         </div>
       </header>
       <div class="data-actions">
@@ -685,15 +395,13 @@ const handleAllDataImport = async (event: Event) => {
         <button type="button" @click="triggerAllImport">导入数据</button>
         <input
           ref="allDataInputRef"
+          class="hidden-input"
           type="file"
           accept="application/json"
-          class="hidden-input"
           @change="handleAllDataImport"
         />
       </div>
-      <p class="data-hint">
-        导入会覆盖当前所有计划与理财记录，操作前请确保备份。
-      </p>
+      <p class="data-hint">导入将覆盖当前数据，操作前请先导出备份。</p>
     </section>
   </div>
 </template>
@@ -703,27 +411,23 @@ const handleAllDataImport = async (event: Event) => {
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  padding: 1.5rem 0 3rem;
-  margin: 0 2rem;
-  border-radius: 24px;
+  margin: 0 1.5rem;
 }
 
 .finance-card {
   background: var(--vt-c-white);
-  border: 1px solid var(--vt-c-divider-light-1);
+  border: 1px solid rgba(148, 163, 184, 0.25);
   border-radius: 16px;
   padding: 1.5rem;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .dark .finance-card {
-  background: var(--vt-c-black-mute);
-  border-color: var(--vt-c-divider-dark-1);
+  background: rgba(24, 24, 37, 0.92);
+  border-color: rgba(148, 163, 184, 0.35);
 }
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
 }
 
@@ -731,434 +435,353 @@ const handleAllDataImport = async (event: Event) => {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 1rem;
-}
-
-.card-header p,
-.section-header p {
-  margin: 0.15rem 0 0;
-  color: var(--vt-c-text-3);
-  font-size: 0.9rem;
 }
 
 .chip {
   display: inline-flex;
   flex-direction: column;
-  gap: 0.25rem;
-  padding: 0.6rem 1rem;
+  gap: 0.2rem;
+  padding: 0.5rem 0.9rem;
   border-radius: 999px;
-  background: rgba(15, 23, 42, 0.06);
-  font-size: 0.9rem;
-  text-align: right;
-}
-
-.chip strong {
-  font-size: 1.2rem;
-}
-
-.dark .chip {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--vt-c-text-dark-1);
-}
-
-.highlight-card {
-  border: 1px solid rgba(129, 140, 248, 0.25);
-  background: rgba(255, 255, 255, 0.96);
-}
-
-.dark .highlight-card {
-  background: rgba(24, 24, 37, 0.92);
-  border-color: rgba(129, 140, 248, 0.35);
+  background: rgba(226, 232, 255, 0.6);
 }
 
 .cash-account-grid {
+  margin-top: 1rem;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 1rem;
-  margin-top: 1.25rem;
 }
 
 .cash-account {
-  background: rgba(255, 255, 255, 0.98);
-  border-radius: 14px;
-  padding: 1rem;
-  border: 1px solid rgba(99, 102, 241, 0.25);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-}
-
-.cash-account strong {
-  font-size: 1.4rem;
+  padding: 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(99, 102, 241, 0.25);
 }
 
 .cash-label {
   font-weight: 600;
-  color: var(--vt-c-text-2);
 }
 
-.dark .cash-account {
-  background: rgba(24, 24, 37, 0.9);
-  border-color: rgba(165, 180, 252, 0.35);
-  color: var(--vt-c-text-dark-1);
-  box-shadow: none;
+.amount-pill {
+  display: inline-flex;
+  justify-content: center;
+  border-radius: 12px;
+  padding: 0.25rem 0.6rem;
+  font-weight: 600;
+  font-size: 0.95rem;
 }
 
-.investments-card {
-  border: 1px solid rgba(99, 102, 241, 0.25);
-  background: rgba(255, 255, 255, 0.96);
+.note-text {
+  color: var(--vt-c-text-3);
+  font-size: 0.85rem;
 }
 
-.dark .investments-card {
-  background: rgba(24, 24, 37, 0.92);
-  border-color: rgba(99, 102, 241, 0.3);
+.note-textarea {
+  margin-top: 0.35rem;
+  resize: vertical;
+  border-radius: 8px;
+  border: 1px solid var(--vt-c-divider-light-1);
+  padding: 0.4rem 0.6rem;
 }
 
 .investment-overview {
+  margin-top: 1rem;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 1rem;
-  margin-top: 1rem;
 }
 
 .investment-card {
-  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(148, 163, 184, 0.25);
   border-radius: 14px;
-  padding: 0.85rem;
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  padding: 0.9rem;
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.4rem;
 }
 
-.investment-card.total {
-  border-color: rgba(244, 63, 94, 0.25);
-}
-
-.dark .investment-card {
-  background: rgba(24, 24, 37, 0.9);
-  border-color: rgba(255, 255, 255, 0.08);
-  color: var(--vt-c-text-dark-1);
-}
-
-.dark .investment-card.total {
-  border-color: rgba(244, 63, 94, 0.35);
-}
-
-.investment-record-card {
-  border: 1px solid rgba(99, 102, 241, 0.25);
-  background: rgba(255, 255, 255, 0.96);
-}
-
-.investment-record-form {
+.record-form {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
   margin-top: 1rem;
 }
 
-.investment-record-form label {
+.record-form label {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  font-weight: 500;
+  gap: 0.4rem;
 }
 
-.investment-record-form input {
-  padding: 0.5rem 0.7rem;
+.record-form input,
+.record-form textarea {
   border-radius: 10px;
-  border: 1px solid rgba(15, 23, 42, 0.15);
+  border: 1px solid var(--vt-c-divider-light-1);
+  padding: 0.5rem 0.7rem;
 }
 
-.investment-record-form button {
+.record-form button {
   grid-column: 1 / -1;
-  padding: 0.7rem;
   border: none;
   border-radius: 12px;
-  background: linear-gradient(120deg, rgba(99, 102, 241, 0.85), rgba(147, 51, 234, 0.8));
-  color: #f5f3ff;
+  padding: 0.75rem;
+  background: linear-gradient(120deg, #f43f5e, #a855f7);
+  color: #fff;
   font-weight: 600;
   cursor: pointer;
 }
 
-.data-card {
-  border: 1px solid rgba(129, 140, 248, 0.25);
-  background: rgba(255, 255, 255, 0.96);
+.history-card .table-wrapper {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.history-card table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.history-card th,
+.history-card td {
+  padding: 0.6rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+  text-align: left;
+}
+
+.history-note {
+  margin: 0.25rem 0 0;
+  font-size: 0.8rem;
+  color: var(--vt-c-text-3);
+}
+
+.amount-pill,
+.history-card span {
+  font-weight: 600;
+}
+
+.positive {
+  color: #dc2626;
+}
+
+.negative {
+  color: #15803d;
+}
+
+.empty {
+  margin-top: 0.5rem;
+  color: var(--vt-c-text-3);
 }
 
 .data-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
-  margin: 1rem 0 0.5rem;
+  margin-top: 1rem;
 }
 
 .data-actions button {
   border: none;
-  border-radius: 12px;
-  padding: 0.65rem 1.2rem;
-  background: rgba(248, 250, 255, 0.92);
+  border-radius: 10px;
+  padding: 0.6rem 1rem;
+  background: rgba(99, 102, 241, 0.15);
   cursor: pointer;
-  font-weight: 600;
-}
-
-.dark .data-actions button {
-  background: rgba(30, 27, 75, 0.7);
-  color: var(--vt-c-text-dark-1);
 }
 
 .hidden-input {
   display: none;
 }
+</style>
 
-.data-hint {
-  color: var(--vt-c-text-3);
-  font-size: 0.9rem;
-  margin: 0.5rem 0 0;
-}
-
-.entry-card {
-  border: 1px solid rgba(129, 140, 248, 0.25);
-  background: rgba(255, 255, 255, 0.96);
-}
-
-.dark .entry-card {
-  background: rgba(24, 24, 37, 0.92);
-  border-color: rgba(129, 140, 248, 0.35);
-}
-
-.amount-chip {
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0.45rem 0.9rem;
-  border-radius: 999px;
-  border: none;
-  font-weight: 600;
-  font-size: 1.1rem;
-  color: #b91c1c;
-  background: linear-gradient(120deg, rgba(248, 113, 113, 0.45), rgba(239, 68, 68, 0.35));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  width: 100%;
-  cursor: default;
-}
-
-.amount-chip.negative {
-  color: #14532d;
-  background: linear-gradient(120deg, rgba(134, 239, 172, 0.5), rgba(16, 185, 129, 0.4));
-}
-
-.investment-card.total .amount-chip {
-  color: #b91c1c;
-  background: linear-gradient(120deg, rgba(248, 113, 113, 0.5), rgba(239, 68, 68, 0.4));
-}
-
-.dark .amount-chip {
-  color: var(--vt-c-text-dark-1);
-  background: linear-gradient(120deg, rgba(248, 113, 113, 0.4), rgba(239, 68, 68, 0.35));
-  box-shadow: none;
-}
-.dark .amount-chip.negative {
-  color: #bbf7d0;
-  background: linear-gradient(120deg, rgba(34, 197, 94, 0.35), rgba(16, 185, 129, 0.3));
-}
-
-.dark .investment-card.total .amount-chip {
-  color: #fecdd3;
-  background: linear-gradient(120deg, rgba(248, 113, 113, 0.45), rgba(239, 68, 68, 0.4));
-}
-
-.entry-form {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.25rem;
-  margin-top: 1.25rem;
-}
-
-.entry-form label {
+<style scoped>
+.finance-page {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  font-weight: 500;
+  gap: 2rem;
+  padding: 1.5rem 0 3rem;
 }
 
-.entry-form input,
-.entry-form select,
-.entry-form textarea {
+.finance-card {
+  background: var(--vt-c-white);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 16px;
+  padding: 1.5rem;
+}
+
+.dark .finance-card {
+  background: rgba(24, 24, 37, 0.92);
+  border-color: rgba(148, 163, 184, 0.35);
+}
+
+.summary-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.chip {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(226, 232, 255, 0.6);
+}
+
+.cash-account-grid {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+.cash-account {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(99, 102, 241, 0.25);
+}
+
+.cash-label {
+  font-weight: 600;
+}
+
+.amount-pill {
+  display: inline-flex;
+  justify-content: center;
   border-radius: 12px;
-  border: 1px solid var(--vt-c-divider-light-1);
-  padding: 0.5rem 0.75rem;
+  padding: 0.25rem 0.6rem;
+  font-weight: 600;
   font-size: 0.95rem;
 }
 
-.entry-form textarea {
-  resize: vertical;
+.note-text {
+  color: var(--vt-c-text-3);
+  font-size: 0.85rem;
 }
 
-.entry-form .submit {
+.note-textarea {
+  margin-top: 0.35rem;
+  resize: vertical;
+  border-radius: 8px;
+  border: 1px solid var(--vt-c-divider-light-1);
+  padding: 0.4rem 0.6rem;
+}
+
+.investment-overview {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+.investment-card {
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 14px;
+  padding: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.record-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.record-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.record-form input,
+.record-form textarea {
+  border-radius: 10px;
+  border: 1px solid var(--vt-c-divider-light-1);
+  padding: 0.5rem 0.7rem;
+}
+
+.record-form button {
   grid-column: 1 / -1;
   border: none;
   border-radius: 12px;
-  padding: 0.9rem;
-  background: linear-gradient(120deg, rgba(79, 70, 229, 0.85), rgba(147, 51, 234, 0.85));
-  color: #f8fafc;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.entry-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.entry-header button {
-  border: none;
-  background: transparent;
-  color: var(--vt-c-text-2);
-  cursor: pointer;
-}
-
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.section-header input,
-.section-header select {
-  border-radius: 10px;
-  border: 1px solid var(--vt-c-divider-light-1);
-  padding: 0.35rem 0.6rem;
-}
-
-.daily-summary {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 1rem;
-  margin: 1.25rem 0;
-}
-
-.daily-summary strong {
-  font-size: 1.1rem;
-}
-
-.record-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.record-list li {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1rem 0;
-  border-bottom: 1px dashed var(--vt-c-divider-light-1);
-}
-
-.record-info strong {
-  display: block;
-  margin-bottom: 0.25rem;
-}
-
-.record-meta {
-  font-size: 0.85rem;
-  color: var(--vt-c-text-3);
-}
-
-.record-actions {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-}
-
-.record-actions button {
-  border: none;
-  background: transparent;
-  color: var(--vt-c-text-2);
-  cursor: pointer;
-}
-
-.record-actions span {
-  font-weight: 600;
-}
-
-.month-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1rem;
-  margin-top: 1.25rem;
-}
-
-.month-card {
-  border: 1px solid var(--vt-c-divider-light-1);
-  border-radius: 12px;
   padding: 0.75rem;
+  background: linear-gradient(120deg, #f43f5e, #a855f7);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-.report-text {
-  margin: 1.25rem 0 1.5rem;
-  line-height: 1.5;
-  color: var(--vt-c-text-2);
-}
-
-.report-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 0.75rem;
-}
-
-.table-wrapper {
+.history-card .table-wrapper {
   overflow-x: auto;
   margin-top: 1rem;
 }
 
-table {
+.history-card table {
   width: 100%;
   border-collapse: collapse;
 }
 
-th,
-td {
-  padding: 0.6rem 0.4rem;
+.history-card th,
+.history-card td {
+  padding: 0.6rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.25);
   text-align: left;
-  border-bottom: 1px solid var(--vt-c-divider-light-1);
 }
 
-.table-actions button {
-  border: none;
-  background: transparent;
-  color: var(--vt-c-text-2);
-  cursor: pointer;
-  margin-right: 0.5rem;
+.history-note {
+  margin: 0.25rem 0 0;
+  font-size: 0.8rem;
+  color: var(--vt-c-text-3);
+}
+
+.amount-pill,
+.history-card span {
+  font-weight: 600;
 }
 
 .positive {
-  color: #22c55e;
+  color: #dc2626;
 }
 
 .negative {
-  color: #f43f5e;
+  color: #15803d;
 }
 
 .empty {
+  margin-top: 0.5rem;
   color: var(--vt-c-text-3);
-  margin: 0.5rem 0;
 }
 
-@media (max-width: 720px) {
-  .record-list li {
-    flex-direction: column;
-  }
+.data-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+}
 
-  .record-actions {
-    justify-content: space-between;
-  }
+.data-actions button {
+  border: none;
+  border-radius: 10px;
+  padding: 0.6rem 1rem;
+  background: rgba(99, 102, 241, 0.15);
+  cursor: pointer;
+}
+
+.hidden-input {
+  display: none;
 }
 </style>
