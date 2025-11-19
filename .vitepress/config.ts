@@ -83,6 +83,14 @@ export default defineConfigWithTheme<ThemeConfig>({
   ],
   themeConfig: {
     nav,
+    sidebar: {
+      "/works/ui/": [
+        {
+          text: "My UI",
+          items: [{ text: "button discount", link: "/works/ui/button-discount" },{ text: "button mastery 12", link: "/works/ui/button-mastery-12" }],
+        },
+      ],
+    },
     // 未来用侧边栏 sidebar,
     // 未来建设中文网站
     // localeLinks: [
