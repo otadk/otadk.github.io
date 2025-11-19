@@ -1,3 +1,4 @@
+
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import localforage from "localforage";
@@ -134,14 +135,6 @@ export const useFinanceStore = defineStore("finance", () => {
     await Promise.all([persistInvestmentHistory(), persistSettings()]);
   };
 
-  const updatePvConfig = async (pvMonthlyIncome: number) => {
-    settings.value = mergeSettings({
-      ...settings.value,
-      pvMonthlyIncome,
-    });
-    await persistSettings();
-  };
-
   const replaceFinanceData = async (payload: {
     settings?: FinanceSettings;
     investmentHistory?: InvestmentSnapshot[];
@@ -190,7 +183,6 @@ export const useFinanceStore = defineStore("finance", () => {
     initialized,
     setup,
     addInvestmentSnapshot,
-    updatePvConfig,
     replaceFinanceData,
     getFinanceSnapshot,
     currentCash,
