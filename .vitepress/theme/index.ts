@@ -2,6 +2,7 @@ import { h, App, onMounted } from "vue";
 import { createPinia } from "pinia";
 import { VPTheme } from "@vue/theme";
 import title from "./components/title.vue";
+import DemoBlock from "./components/demo-block.vue";
 import "@assets/style/root.css";
 import "@assets/style/doc.css";
 import { useRouter } from "vitepress";
@@ -15,6 +16,7 @@ export default Object.assign({}, VPTheme, {
   },
   enhanceApp({ app }: { app: App }) {
     app.use(createPinia());
+    app.component("DemoBlock", DemoBlock);
   },
   setup() {
     if (typeof window !== "undefined") {

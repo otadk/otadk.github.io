@@ -39,3 +39,13 @@ body.dark .VPNav.nav-bar {
 .VPNavScreen {
   position: static !important;
 }
+
+@media (min-width: 1280px) {
+    .VPContentDoc:not(.has-sidebar.has-aside) {
+        padding-left: 64px !important;
+    }
+}
+
+.content {
+  margin: 0 !important;
+}

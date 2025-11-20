@@ -1,4 +1,7 @@
 <script lang="ts" setup>
+/**
+ * @fileoverview 理财金融页面 - 大部分为ai生成
+ */
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
 import dayjs from "dayjs";
 import type {
@@ -106,21 +109,11 @@ const investmentRecordForm = reactive({
 
 const totalAssets = computed(() => currentCash.value + currentInvestment.value);
 
-const totalExcludingAdjustments = computed(() => {
-  const latest = latestSnapshot.value;
-  if (!latest) {
-    const v = settings.value.investmentValues;
-    return currentCash.value + (v.usd ?? 0);
-  }
-  return currentCash.value + (latest.usd ?? 0);
-});
-
-const calcNetCash = (snapshot: InvestmentSnapshot) =>
+const calcCashTotal = (snapshot: InvestmentSnapshot) =>
   (snapshot.wechat ?? 0) +
   (snapshot.alipay ?? 0) +
   (snapshot.bank ?? 0) +
-  (snapshot["cs-cash"] ?? 0) +
-  (snapshot.usd ?? 0);
+  (snapshot["cs-cash"] ?? 0);
 
 const calcTotalAssets = (snapshot: InvestmentSnapshot) =>
   (snapshot.wechat ?? 0) +
@@ -135,15 +128,15 @@ const calcTotalAssets = (snapshot: InvestmentSnapshot) =>
 const historyRows = computed<HistoryRow[]>(() => {
   const list = investmentHistory.value.slice(0, 60);
   return list.map((snapshot, index) => {
-    const netCash = calcNetCash(snapshot);
+    const cashTotal = calcCashTotal(snapshot);
     const totalAsset = calcTotalAssets(snapshot);
     const prev = list[index + 1];
-    const prevNet = prev ? calcNetCash(prev) : undefined;
+    const prevCash = prev ? calcCashTotal(prev) : undefined;
     const prevTotal = prev ? calcTotalAssets(prev) : undefined;
     return {
       snapshot,
-      netCash,
-      cashFlow: prevNet !== undefined ? netCash - prevNet : undefined,
+      cashTotal,
+      cashFlow: prevCash !== undefined ? cashTotal - prevCash : undefined,
       totalAsset,
       totalAssetFlow:
         prevTotal !== undefined ? totalAsset - prevTotal : undefined,
@@ -155,14 +148,14 @@ const chartRows = computed(() => [...historyRows.value].reverse());
 
 interface HistoryRow {
   snapshot: InvestmentSnapshot;
-  netCash: number;
+  cashTotal: number;
   cashFlow?: number;
   totalAsset: number;
   totalAssetFlow?: number;
 }
 
 const chartMetrics = [
-  { key: "netCash", label: "净现金", getter: (row: HistoryRow) => row.netCash },
+  { key: "cashTotal", label: "现金", getter: (row: HistoryRow) => row.cashTotal },
   {
     key: "totalAsset",
     label: "总资产",
@@ -254,7 +247,7 @@ const updateChart = () => {
         top: 0,
         data: chartMetrics.map((metric) => metric.label),
         selected: {
-          净现金: true,
+          现金: true,
           总资产: true,
           微信: false,
           支付宝: false,
@@ -466,23 +459,15 @@ const handleAllDataImport = async (event: Event) => {
         </div>
         <div class="chip-stack">
           <span class="chip">
-            现金合计
+            现金合计（当天取用）
             <strong :class="['amount-pill', amountClass(currentCash)]">
               {{ formatCurrency(currentCash, true) }}
             </strong>
           </span>
           <span class="chip">
-            总资产（现金+理财）
+            总资产（所有）
             <strong :class="['amount-pill', amountClass(totalAssets)]">
               {{ formatCurrency(totalAssets, true) }}
-            </strong>
-          </span>
-          <span class="chip">
-            净现金（不含光伏/CS投资和负债）
-            <strong
-              :class="['amount-pill', amountClass(totalExcludingAdjustments)]"
-            >
-              {{ formatCurrency(totalExcludingAdjustments, true) }}
             </strong>
           </span>
         </div>
@@ -637,7 +622,7 @@ const handleAllDataImport = async (event: Event) => {
           <thead>
             <tr>
               <th>日期</th>
-              <th>净现金</th>
+              <th>现金</th>
               <th>现金流</th>
               <th>总资产</th>
               <th>资产变化</th>
@@ -650,8 +635,8 @@ const handleAllDataImport = async (event: Event) => {
             <tr v-for="row in historyRows" :key="row.snapshot.date">
               <td>{{ row.snapshot.date }}</td>
               <td>
-                <span :class="['amount-pill', amountClass(row.netCash)]">
-                  {{ formatCurrency(row.netCash, true) }}
+                <span :class="['amount-pill', amountClass(row.cashTotal)]">
+                  {{ formatCurrency(row.cashTotal, true) }}
                 </span>
               </td>
               <td>

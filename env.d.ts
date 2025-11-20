@@ -1,4 +1,5 @@
-// <reference types="vitepress/client" />;
+/// <reference types="vitepress/client" />
+/// <reference types="vite/client" />
 
 declare module "@vue/theme/config" {
   import { UserConfig } from "vitepress";
@@ -18,3 +19,9 @@ declare module "*.vue" {
 }
 
 declare module "body-scroll-lock";
+
+declare module "markdown-it-container" {
+  import type { PluginWithParams } from "markdown-it";
+  const container: PluginWithParams<any>;
+  export default container;
+}

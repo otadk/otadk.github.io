@@ -2,6 +2,7 @@ import { defineConfigWithTheme } from "vitepress";
 import type { Config as ThemeConfig } from "@vue/theme";
 import baseConfig from "@vue/theme/config";
 import { headerPlugin } from "./headerMdPlugin";
+import { demoContainerPlugin } from "./demoContainerPlugin";
 import path from "path";
 
 const nav: ThemeConfig["nav"] = [
@@ -87,7 +88,11 @@ export default defineConfigWithTheme<ThemeConfig>({
       "/works/ui/": [
         {
           text: "My UI",
-          items: [{ text: "button discount", link: "/works/ui/button-discount" },{ text: "button mastery 12", link: "/works/ui/button-mastery-12" }],
+          items: [
+            { text: "overview", link: "/works/ui/" },
+            { text: "button discount", link: "/works/ui/button-discount" },
+            { text: "button mastery 12", link: "/works/ui/button-mastery-12" },
+          ],
         },
       ],
     },
@@ -122,6 +127,7 @@ export default defineConfigWithTheme<ThemeConfig>({
     theme: "github-dark",
     config(md) {
       md.use(headerPlugin);
+      md.use(demoContainerPlugin);
     },
   },
 

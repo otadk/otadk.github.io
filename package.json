@@ -17,6 +17,7 @@
     "dayjs": "^1.11.19",
     "echarts": "^6.0.0",
     "localforage": "^1.10.0",
+    "markdown-it-container": "^4.0.0",
     "pinia": "^3.0.3",
     "three": "^0.180.0",
     "vitepress": "^1.4.3",
