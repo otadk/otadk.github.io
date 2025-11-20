@@ -3,9 +3,11 @@ import { createPinia } from "pinia";
 import { VPTheme } from "@vue/theme";
 import title from "./components/title.vue";
 import DemoBlock from "./components/demo-block.vue";
+import { useRouter } from "vitepress";
+import "@vue/repl/style.css";
 import "@assets/style/root.css";
 import "@assets/style/doc.css";
-import { useRouter } from "vitepress";
+
 
 export default Object.assign({}, VPTheme, {
   Layout: () => {

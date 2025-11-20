@@ -8,8 +8,7 @@ import {
 } from "vue";
 import type { DefineComponent } from "vue";
 import { Repl, useStore, type ReplStore } from "@vue/repl";
-import CodemirrorEditor from "@vue/repl/codemirror-editor";
-import "@vue/repl/style.css";
+import replStyles from "@vue/repl/style.css?inline";
 import { useData } from "vitepress";
 
 const props = defineProps<{
@@ -18,17 +17,11 @@ const props = defineProps<{
 
 const { isDark } = useData();
 
-const rawSourceModules = import.meta.glob("../**/*.vue", {
+const rawSourceModules = import.meta.glob("../views/works/ui/*.vue", {
   query: "?raw",
   import: "default",
 });
-const projectSourceModules = import.meta.glob("/src/**/*.vue", {
-  query: "?raw",
-  import: "default",
-});
-const rawComponentModules = import.meta.glob("../**/*.vue");
-const projectComponentModules = import.meta.glob("/src/**/*.vue");
-
+const rawComponentModules = import.meta.glob("../views/works/ui/*.vue");
 const sourceMap: Record<string, () => Promise<string>> = {};
 const componentMap: Record<string, () => Promise<any>> = {};
 
@@ -55,21 +48,15 @@ const addEntry = (
 Object.entries(rawSourceModules).forEach(([key, loader]) => {
   addEntry(sourceMap, key, loader as () => Promise<any>);
 });
-Object.entries(projectSourceModules).forEach(([key, loader]) => {
-  addEntry(sourceMap, key, loader as () => Promise<any>);
-});
 Object.entries(rawComponentModules).forEach(([key, loader]) => {
   addEntry(componentMap, key, loader as () => Promise<any>);
 });
-Object.entries(projectComponentModules).forEach(([key, loader]) => {
-  addEntry(componentMap, key, loader as () => Promise<any>);
-});
-
 const loading = ref(true);
 const error = ref<string | null>(null);
 const sourceCode = ref("");
 const store = shallowRef<ReplStore | null>(null);
 const demoComponent = shallowRef<DefineComponent | null>(null);
+const editorComponent = shallowRef<any>(null);
 const isMobileView = ref(false);
 
 const defaultMainFile = `import { createApp } from 'vue'
@@ -81,6 +68,22 @@ createApp(App).mount('#app')
 const isClient = typeof window !== "undefined";
 let mediaQuery: MediaQueryList | null = null;
 let mediaHandler: ((event: MediaQueryListEvent) => void) | null = null;
+let hasInjectedStyle = false;
+
+const ensureReplStyles = () => {
+  if (hasInjectedStyle || typeof document === "undefined") return;
+  const style = document.createElement("style");
+  style.textContent = replStyles;
+  style.setAttribute("data-vp-repl-style", "true");
+  document.head.appendChild(style);
+  hasInjectedStyle = true;
+};
+
+const ensureEditor = async () => {
+  if (editorComponent.value || typeof window === "undefined") return;
+  const mod = await import("@vue/repl/codemirror-editor");
+  editorComponent.value = mod.default;
+};
 
 const resolveLoader = <T extends () => Promise<any>>(
   map: Record<string, T>,
@@ -194,6 +197,8 @@ const loadDemo = async () => {
 
 onMounted(() => {
   setupMediaWatcher();
+  ensureReplStyles();
+  ensureEditor();
   loadDemo();
 });
 
@@ -235,7 +240,7 @@ watch(isMobileView, () => {
       </div>
 
       <Repl
-        v-else-if="store"
+        v-else-if="store && editorComponent"
         :store="store"
         :ssr="false"
         :auto-resize="true"
@@ -246,7 +251,7 @@ watch(isMobileView, () => {
         :show-ts-config="false"
         :clear-console="false"
         :theme="isDark ? 'dark' : 'light'"
-        :editor="CodemirrorEditor"
+        :editor="editorComponent"
       />
 
       <div v-else class="demo-state">暂无示例</div>

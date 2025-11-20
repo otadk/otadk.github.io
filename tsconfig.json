@@ -15,7 +15,8 @@
     "paths": {
       "@theme/*": [".vitepress/theme/*"],
       "@assets/*": ["assets/*"]
-    }
+    },
   },
-  "include": ["env.d.ts", "src/**/*", ".vitepress/**/*"]
+  "include": ["env.d.ts", "src/**/*", ".vitepress/**/*"],
+  "exclude": [".vitepress/dist"]
 }

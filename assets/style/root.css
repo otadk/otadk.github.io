@@ -41,9 +41,9 @@ body.dark .VPNav.nav-bar {
 }
 
 @media (min-width: 1280px) {
-    .VPContentDoc:not(.has-sidebar.has-aside) {
-        padding-left: 64px !important;
-    }
+  .VPContentDoc:not(.has-sidebar.has-aside) {
+    padding-left: 64px !important;
+  }
 }
 
 .content {

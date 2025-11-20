@@ -138,7 +138,7 @@ export default defineConfigWithTheme<ThemeConfig>({
     optimizeDeps: {
       include: ["localforage"],
     },
-    ssr: { external: ["@vue/repl"] },
+    ssr: { noExternal: ['@vue/repl'] },
     server: { host: true, fs: { allow: ["../.."] } },
     build: { chunkSizeWarningLimit: Infinity },
     json: { stringify: true },
