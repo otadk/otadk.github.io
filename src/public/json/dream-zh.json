@@ -38,5 +38,13 @@
   {
     "title": "发视频",
     "description": "完成国内版后发视频到 b站等平台宣传"
+  },
+  {
+    "title": "完成tiny-editor提交pr",
+    "description": "完成tiny-editor提交pr，解决图片预览问题，之前跟cargo说要提交的，最好25年前完成"
+  },
+  {
+    "title": "优化github个人资料",
+    "description": "参考大佬的个人资料搞，最好25年前完成"
   }
 ]
