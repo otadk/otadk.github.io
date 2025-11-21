@@ -69,6 +69,7 @@
     #ffb8ab
   );
   opacity: 1; /* ⭐ 边框透明度可以随意调 */
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;

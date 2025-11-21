@@ -9,13 +9,10 @@ import {
 import type { DefineComponent } from "vue";
 import { Repl, useStore, type ReplStore } from "@vue/repl";
 import replStyles from "@vue/repl/style.css?inline";
-import { useData } from "vitepress";
 
 const props = defineProps<{
   src: string;
 }>();
-
-const { isDark } = useData();
 
 const rawSourceModules = import.meta.glob("../views/works/ui/*.vue", {
   query: "?raw",
@@ -250,7 +247,6 @@ watch(isMobileView, () => {
         :show-import-map="false"
         :show-ts-config="false"
         :clear-console="false"
-        :theme="isDark ? 'dark' : 'light'"
         :editor="editorComponent"
       />
 

@@ -68,7 +68,7 @@ import {
 } from "./constant";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, onBeforeUnmount, watch } from "vue";
 
 const started = ref(false); // 游戏是否开始了
 const gameOver = ref(false); // 游戏是否结束了
@@ -76,12 +76,13 @@ const gameOverMessage = ref("Game Over"); // 游戏结束
 const mapSizeInput = ref(); // 地图大小输入
 const snakeSpeedInput = ref(); // 蛇速度输入
 
-const scene = new THREE.Scene(); // 场景
-const camera = new THREE.PerspectiveCamera(
-  50,
-  window.innerWidth / window.innerHeight
-); // 相机
-const renderer = new THREE.WebGLRenderer({ antialias: true }); // 渲染
+const isClient = typeof window !== "undefined";
+let scene; // 场景
+let camera; // 相机
+let renderer; // 渲染器
+let controls;
+let removeKeydown;
+let removeResize;
 const interval = 100; // 渲染间隔
 let mapSize = DEFAULT_MAP_SIZE; // 地图大小
 let map; // 地图
@@ -105,9 +106,36 @@ let crossBlockCount = 0; // 穿越障碍道具计数，每吃1个道具+1，每�
 let backgroundMaterial; // 背景材料，用于动态更新
 let audioSource; // 背景音乐，用于关闭音乐
 
-scene.background = new THREE.Color(0x222222); // 设置背景颜色
-scene.fog = new THREE.FogExp2(0xefd1b5, 0.0025); // 设置雾化
-renderer.setSize(window.innerWidth, window.innerHeight); // 设置全屏
+const initThree = () => {
+  if (!isClient || scene) return;
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(
+    50,
+    window.innerWidth / window.innerHeight
+  );
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  scene.background = new THREE.Color(0x222222);
+  scene.fog = new THREE.FogExp2(0xefd1b5, 0.0025);
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.update();
+  controls.addEventListener("change", () => {
+    renderer.render(scene, camera);
+  });
+  removeKeydown = (event) => {
+    const directionFromMap = KEY_DIRECTIONS_MAP[event.key];
+    nextDirection =
+      directionFromMap === undefined ? nextDirection : directionFromMap;
+  };
+  removeResize = () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.render(scene, camera);
+  };
+  window.addEventListener("keydown", removeKeydown);
+  window.addEventListener("resize", removeResize);
+};
 
 // 获得随机可用地点，注意调用该函数必须在初始化之后
 const getRandomPosition = () => {
@@ -129,6 +157,7 @@ const getRandomPosition = () => {
 
 // 开始设置地图
 const startMap = () => {
+  if (!scene || !camera || !controls) return;
   // 设置相机位置
   camera.position.x = (mapSize - 1) / 2;
   camera.position.y = (mapSize - 1) / 2;
@@ -385,6 +414,7 @@ const buffAnimate = () => {
 
 // 动画循环函数
 const animate = () => {
+  if (!scene || !renderer || !camera) return;
   // 渲染所有的方块
   map.forEach((xMap, x) => {
     xMap.forEach((node, y) => {
@@ -404,6 +434,10 @@ const animate = () => {
 
 // 点击游戏开始
 const startGame = () => {
+  if (!scene || !renderer || !camera || !controls) {
+    initThree();
+  }
+  if (!scene || !renderer || !camera || !controls) return;
   started.value = true;
   // 判断输入是否有效，无输入即为undefined后续有对应处理
   const mapSizeValid =
@@ -431,14 +465,30 @@ const endGame = () => {
   clearInterval(snakeAnimateId);
   clearInterval(blockAnimateId);
   clearInterval(buffAnimateId);
-  audioSource.stop();
+  if (audioSource) {
+    audioSource.stop();
+  }
   gameOver.value = true;
 };
 
 // 初始化挂载
 const webgl = ref(null);
 onMounted(() => {
-  webgl.value.appendChild(renderer.domElement); // 加载three js的canvas
+  if (!isClient) return;
+  initThree();
+  if (webgl.value && renderer) {
+    webgl.value.appendChild(renderer.domElement);
+  }
+});
+onBeforeUnmount(() => {
+  if (!isClient) return;
+  controls?.dispose();
+  if (removeKeydown) {
+    window.removeEventListener("keydown", removeKeydown);
+  }
+  if (removeResize) {
+    window.removeEventListener("resize", removeResize);
+  }
 });
 
 // 游戏结束时重新开始游戏
@@ -446,30 +496,9 @@ const restartGame = () => {
   location.reload();
 };
 
-// 设置镜头可操作
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.update();
-controls.addEventListener("change", () => {
-  renderer.render(scene, camera);
-});
-
-// 键盘控制，只有上下左右w s a d，其他情况无视
-window.addEventListener("keydown", (event) => {
-  const directionFromMap = KEY_DIRECTIONS_MAP[event.key];
-  nextDirection =
-    directionFromMap === undefined ? nextDirection : directionFromMap;
-});
-
-// 窗口大小改变时更新画布，保持canvas浏览器全屏
-window.addEventListener("resize", () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.render(scene, camera);
-});
-
 // 播放音乐
 const startMusic = () => {
+  if (!isClient) return;
   const sampleRate = 50000;
   const duration = 0.5;
   const frequency = 400;
@@ -506,6 +535,7 @@ const startMusic = () => {
 watch(
   () => started.value,
   () => {
+    if (!isClient) return;
     const appEl = document.querySelector(".VPApp");
     if (appEl) {
       appEl.style.setProperty("display", "none", "important");
@@ -517,6 +547,7 @@ watch(
 watch(
   () => gameOver.value,
   () => {
+    if (!isClient) return;
     const appEl = document.querySelector(".VPApp");
     if (appEl) {
       appEl.style.setProperty("display", "flex", "important");
