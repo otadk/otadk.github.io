@@ -10,11 +10,13 @@ import type {
 } from "@theme/interface/finance";
 import { useFinanceStore } from "@theme/store/finance";
 import { usePlanStore } from "@theme/store/plan";
+import { useWeightStore } from "@theme/store/weight";
 import { storeToRefs } from "pinia";
 import * as echarts from "echarts";
 
 const financeStore = useFinanceStore();
 const planStore = usePlanStore();
+const weightStore = useWeightStore();
 const {
   investmentHistory,
   latestInvestmentSnapshot,
@@ -269,8 +271,11 @@ const updateChart = () => {
 };
 
 onMounted(async () => {
-  await financeStore.setup();
-  planStore.setup();
+  await Promise.all([
+    financeStore.setup(),
+    planStore.setup(),
+    weightStore.setup(),
+  ]);
   fillFromHistory();
   initChart();
 });
@@ -408,10 +413,11 @@ const showHistoryNotes = ref(false);
 
 const exportAllData = () => {
   const payload = {
-    version: 2,
+    version: 3,
     generatedAt: new Date().toISOString(),
     plan: planStore.getPlanSnapshot(),
     finance: financeStore.getFinanceSnapshot(),
+    weight: weightStore.getRecordsSnapshot(),
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], {
     type: "application/json",
@@ -439,6 +445,9 @@ const handleAllDataImport = async (event: Event) => {
     }
     if (json.finance) {
       await financeStore.replaceFinanceData(json.finance);
+    }
+    if (json.weight && Array.isArray(json.weight)) {
+      await weightStore.replaceRecords(json.weight);
     }
     alert("导入成功，数据已更新。");
   } catch (err: any) {
