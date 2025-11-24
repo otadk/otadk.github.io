@@ -305,14 +305,15 @@ const fillFromHistory = () => {
   investmentRecordForm.csInvestment = prev["cs-investment"] ?? 0;
   investmentRecordForm.pvProject = prev["pv-project"] ?? 0;
   investmentRecordForm.loan = prev.loan ?? 0;
-  investmentRecordForm.wechatNote = "";
-  investmentRecordForm.alipayNote = "";
-  investmentRecordForm.bankNote = "";
-  investmentRecordForm.csCashNote = "";
-  investmentRecordForm.usdNote = "";
-  investmentRecordForm.csInvestmentNote = "";
-  investmentRecordForm.pvProjectNote = "";
-  investmentRecordForm.loanNote = "";
+  const notes = prev.notes ?? {};
+  investmentRecordForm.wechatNote = notes.wechat ?? "";
+  investmentRecordForm.alipayNote = notes.alipay ?? "";
+  investmentRecordForm.bankNote = notes.bank ?? "";
+  investmentRecordForm.csCashNote = notes["cs-cash"] ?? "";
+  investmentRecordForm.usdNote = notes.usd ?? "";
+  investmentRecordForm.csInvestmentNote = notes["cs-investment"] ?? "";
+  investmentRecordForm.pvProjectNote = notes["pv-project"] ?? "";
+  investmentRecordForm.loanNote = notes.loan ?? "";
   allowAutoFill = false;
 };
 
@@ -502,13 +503,18 @@ const handleAllDataImport = async (event: Event) => {
             }}
           </span>
           <small
-            v-if="getNote(latestSnapshot.notes, field.noteKey as keyof SnapshotNotes)"
+            v-if="
+              getNote(
+                latestSnapshot.notes,
+                field.snapshotKey as keyof SnapshotNotes
+              )
+            "
             class="note-text"
           >
             {{
               getNote(
                 latestSnapshot.notes,
-                field.noteKey as keyof SnapshotNotes
+                field.snapshotKey as keyof SnapshotNotes
               )
             }}
           </small>
