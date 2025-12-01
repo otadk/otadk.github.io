@@ -25,10 +25,10 @@ const nav: ThemeConfig["nav"] = [
         text: "daily",
         activeMatch: `/tools/daily`,
         items: [
-          { text: 'daily', link: 'tools/daily' },
-          { text: 'daily overview', link: 'tools/daily/overview' },
-        ]
-      }
+          { text: "daily", link: "tools/daily" },
+          { text: "daily overview", link: "tools/daily/overview" },
+        ],
+      },
     ],
   },
   {
@@ -47,9 +47,13 @@ const nav: ThemeConfig["nav"] = [
         text: "Crafting the Next Layer: Aesthetics, Automation, and AI Integration",
         link: "/blogs/crafting-the-next-layer",
       },
-
+      {
+        text: "Opening the Next: Closure, Reflection, and a New Beginning",
+        link: "/blogs/opening-the-next",
+      },
     ],
   },
+  { text: "next", link: "https://gjf8.com/" },
 ];
 
 export default defineConfigWithTheme<ThemeConfig>({
@@ -62,7 +66,10 @@ export default defineConfigWithTheme<ThemeConfig>({
   description: "otadk.github.io - a personal website from Jingfei Guo",
   srcDir: "src",
   head: [
-    ["meta", { name: "msvalidate.01", content: "7B3D18E49E120F96C2CB746A05E6A657" }],
+    [
+      "meta",
+      { name: "msvalidate.01", content: "7B3D18E49E120F96C2CB746A05E6A657" },
+    ],
     ["meta", { name: "theme-color", content: "#3c8772" }],
     ["meta", { property: "og:url", content: "https://otadk.github.io/" }],
     ["meta", { property: "og:type", content: "website" }],
@@ -96,7 +103,6 @@ export default defineConfigWithTheme<ThemeConfig>({
         },
       ],
     },
-    // 未来用侧边栏 sidebar,
     // 未来建设中文网站
     // localeLinks: [
     //   {
@@ -115,11 +121,7 @@ export default defineConfigWithTheme<ThemeConfig>({
       { icon: "github", link: "https://github.com/otadk/otadk.github.io" },
     ],
     footer: {
-      license: {
-        text: "MIT License",
-        link: "https://opensource.org/licenses/MIT",
-      },
-      // 未来会有版权的 copyright: `Copyright © 9999-${new Date().getFullYear()} g30057461`,
+      copyright: `Copyright © 2025-${new Date().getFullYear()} 1647751528@qq.com`,
     },
   },
 
@@ -138,7 +140,7 @@ export default defineConfigWithTheme<ThemeConfig>({
     optimizeDeps: {
       include: ["localforage"],
     },
-    ssr: { noExternal: ['@vue/repl'] },
+    ssr: { noExternal: ["@vue/repl"] },
     server: { host: true, fs: { allow: ["../.."] } },
     build: { chunkSizeWarningLimit: Infinity },
     json: { stringify: true },
