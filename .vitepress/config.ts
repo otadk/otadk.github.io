@@ -13,6 +13,7 @@ const nav: ThemeConfig["nav"] = [
       { text: "Starter", link: "/works/starter" },
       { text: "Greedy Snake", link: "/works/greedy-snake" },
       { text: "Dreams", link: "/works/dreams" },
+      { text: "UI", link: "/works/ui/" },
     ],
   },
   {
@@ -97,6 +98,7 @@ export default defineConfigWithTheme<ThemeConfig>({
           text: "My UI",
           items: [
             { text: "overview", link: "/works/ui/" },
+            { text: "diy tour demo", link: "/works/ui/diy-tour-demo" },
             { text: "button discount", link: "/works/ui/button-discount" },
             { text: "button mastery 12", link: "/works/ui/button-mastery-12" },
           ],

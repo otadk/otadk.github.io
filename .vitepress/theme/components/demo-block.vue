@@ -48,6 +48,26 @@ Object.entries(rawSourceModules).forEach(([key, loader]) => {
 Object.entries(rawComponentModules).forEach(([key, loader]) => {
   addEntry(componentMap, key, loader as () => Promise<any>);
 });
+
+const normalizePath = (value: string) =>
+  value
+    .replace(/\\/g, "/")
+    .replace(/^\/+/, "")
+    .replace(/^src\//, "")
+    .replace(/^(\.\.\/)+/, "")
+    .replace(/^\.\//, "");
+
+const getDir = (value: string) => {
+  const normalized = normalizePath(value);
+  const index = normalized.lastIndexOf("/");
+  return index >= 0 ? normalized.slice(0, index) : "";
+};
+
+const loadRawModule = async (loader: () => Promise<any>): Promise<string> => {
+  const mod = await loader();
+  if (typeof mod === "string") return mod;
+  return (mod as any)?.default ?? "";
+};
 const loading = ref(true);
 const error = ref<string | null>(null);
 const sourceCode = ref("");
@@ -162,7 +182,7 @@ const loadDemo = async () => {
   }
 
   try {
-    const source = await sourceLoader();
+    const source = await loadRawModule(sourceLoader);
     sourceCode.value = source;
 
     const componentLoader = resolveLoader(componentMap, props.src);
@@ -175,10 +195,35 @@ const loadDemo = async () => {
       const replStore = useStore();
       replStore.showOutput = true;
       replStore.outputMode = "preview";
+
+      const normalizedDir = getDir(props.src || "");
+      const srcFileName = (props.src || "").split("/").pop();
+      const includeExtras = (srcFileName || "").includes("diy-tour-demo");
+      const allowedExtraNames = new Set<string>(["diy-tour.vue"]);
+      const extraFilesEntries = includeExtras
+        ? Object.entries(rawSourceModules).filter(([path]) => {
+            const fileName = path.split("/").pop();
+            return (
+              getDir(path) === normalizedDir &&
+              !!fileName &&
+              allowedExtraNames.has(fileName)
+            );
+          })
+        : [];
+
+      const extraFiles: Record<string, string> = {};
+      for (const [path, loader] of extraFilesEntries) {
+        const fileName = path.split("/").pop();
+        if (!fileName || fileName === srcFileName) continue;
+        const content = await loadRawModule(loader as () => Promise<any>);
+        extraFiles[fileName] = content;
+      }
+
       await replStore.setFiles(
         {
           "App.vue": source,
           "main.js": defaultMainFile,
+          ...extraFiles,
         },
         "App.vue"
       );
@@ -236,19 +281,21 @@ watch(isMobileView, () => {
         </details>
       </div>
 
-      <Repl
-        v-else-if="store && editorComponent"
-        :store="store"
-        :ssr="false"
-        :auto-resize="true"
-        layout="vertical"
-        :layout-reverse="true"
-        :show-compile-output="false"
-        :show-import-map="false"
-        :show-ts-config="false"
-        :clear-console="false"
-        :editor="editorComponent"
-      />
+      <div v-else-if="store && editorComponent" class="repl-shell">
+        <Repl
+          :store="store"
+          :ssr="false"
+          :auto-resize="false"
+          layout="vertical"
+          :layout-reverse="true"
+          :show-compile-output="false"
+          :show-import-map="false"
+          :show-ts-config="false"
+          :clear-console="false"
+          :editor="editorComponent"
+          style="height: 760px; max-height: 85vh;"
+        />
+      </div>
 
       <div v-else class="demo-state">暂无示例</div>
     </ClientOnly>
@@ -313,5 +360,14 @@ watch(isMobileView, () => {
   color: var(--vt-c-text-1);
   overflow-x: auto;
   max-height: 320px;
+}
+
+.repl-shell {
+  min-height: 720px;
+  max-height: 85vh;
+}
+
+.repl-shell :deep(.vue-repl) {
+  height: 100%;
 }
 </style>
