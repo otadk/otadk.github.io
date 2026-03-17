@@ -10,9 +10,9 @@ const nav: ThemeConfig["nav"] = [
     text: "works",
     activeMatch: `^/works/`,
     items: [
+      { text: "Nuxt Edge AI", link: "/works/nuxt-edge-ai" },
       { text: "Starter", link: "/works/starter" },
       { text: "Greedy Snake", link: "/works/greedy-snake" },
-      { text: "Dreams", link: "/works/dreams" },
       { text: "UI", link: "/works/ui/" },
     ],
   },
@@ -54,7 +54,6 @@ const nav: ThemeConfig["nav"] = [
       },
     ],
   },
-  { text: "next", link: "https://gjf8.com/" },
 ];
 
 export default defineConfigWithTheme<ThemeConfig>({
